@@ -2,5 +2,6 @@
 /build-*/
 __pycache__/
 /secrets/
+/backups/
 *.pfx
 *.key.pem
