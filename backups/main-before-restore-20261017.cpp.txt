@@ -1,0 +1,758 @@
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <windows.h>
+#include <bcrypt.h>
+#include <conio.h>
+
+#include <algorithm>
+#include <array>
+#include <chrono>
+#include <cstdint>
+#include <cstdlib>
+#include <iostream>
+#include <map>
+#include <stdexcept>
+#include <string>
+#include <string_view>
+#include <vector>
+
+using Clock = std::chrono::steady_clock;
+constexpr size_t MaxFrame = 2048, MaxQueue = 65536, MaxText = 1024;
+constexpr int MaxPending = 8;
+
+struct Winsock
+{
+    Winsock()
+    {
+        WSADATA w{};
+        if (WSAStartup(MAKEWORD(2, 2), &w))
+            throw std::runtime_error("WSAStartup falhou");
+    }
+    ~Winsock() { WSACleanup(); }
+};
+struct Socket
+{
+    SOCKET value = INVALID_SOCKET;
+    explicit Socket(SOCKET s = INVALID_SOCKET) : value(s) {}
+    ~Socket()
+    {
+        if (value != INVALID_SOCKET)
+            closesocket(value);
+    }
+    Socket(const Socket &) = delete;
+    Socket &operator=(const Socket &) = delete;
+};
+[[noreturn]] void net_error(const char *action)
+{
+    throw std::runtime_error(std::string(action) + ": Winsock " + std::to_string(WSAGetLastError()));
+}
+void nonblocking(SOCKET s)
+{
+    u_long one = 1;
+    if (ioctlsocket(s, FIONBIO, &one))
+        net_error("ioctlsocket");
+}
+bool printable(std::string_view s)
+{
+    return std::all_of(s.begin(), s.end(), [](unsigned char c)
+                       { return c >= 32 && c <= 126; });
+}
+bool name_ok(std::string_view s)
+{
+    return !s.empty() && s.size() <= 24 && std::all_of(s.begin(), s.end(), [](unsigned char c)
+                                                       { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
+                                                                (c >= '0' && c <= '9') || c == '_' || c == '-'; });
+}
+std::vector<std::string> split(const std::string &s)
+{
+    std::vector<std::string> result;
+    size_t start = 0;
+    for (;;)
+    {
+        auto end = s.find('\t', start);
+        result.push_back(s.substr(start, end == std::string::npos ? end : end - start));
+        if (end == std::string::npos)
+            return result;
+        start = end + 1;
+    }
+}
+unsigned number(std::string_view value, unsigned low, unsigned high)
+{
+    if (value.empty() || value.size() > 10)
+        throw std::runtime_error("Numero invalido");
+    std::uint64_t n = 0;
+    for (char c : value)
+    {
+        if (c < '0' || c > '9')
+            throw std::runtime_error("Numero invalido");
+        n = n * 10 + static_cast<unsigned>(c - '0');
+    }
+    if (n < low || n > high)
+        throw std::runtime_error("Numero fora do limite");
+    return static_cast<unsigned>(n);
+}
+std::string password()
+{
+    const char *p = std::getenv("DSR_ROOM_PASSWORD");
+    std::string result = p ? p : "";
+    if (result.size() < 8 || result.size() > 128 || !printable(result))
+        throw std::runtime_error("Defina DSR_ROOM_PASSWORD com 8 a 128 caracteres ASCII imprimiveis");
+    return result;
+}
+sockaddr_in address(const std::string &ip, unsigned port)
+{
+    sockaddr_in a{};
+    a.sin_family = AF_INET;
+    a.sin_port = htons(static_cast<u_short>(port));
+    if (inet_pton(AF_INET, ip.c_str(), &a.sin_addr) != 1)
+        throw std::runtime_error("Use um endereco IPv4 numerico");
+    return a;
+}
+std::string room_id()
+{
+    std::array<unsigned char, 16> bytes{};
+    if (BCryptGenRandom(nullptr, bytes.data(), static_cast<ULONG>(bytes.size()), BCRYPT_USE_SYSTEM_PREFERRED_RNG) != 0)
+        throw std::runtime_error("Geracao do ID da sala falhou");
+    std::string result;
+    for (auto b : bytes)
+    {
+        result += "0123456789abcdef"[b >> 4];
+        result += "0123456789abcdef"[b & 15];
+    }
+    return result;
+}
+bool queue(std::string &out, const std::string &line)
+{
+    if (line.size() > MaxFrame || out.size() + line.size() + 1 > MaxQueue)
+        return false;
+    out += line;
+    out += '\n';
+    return true;
+}
+bool flush(SOCKET s, std::string &out)
+{
+    if (out.empty())
+        return true;
+    const int n = send(s, out.data(), static_cast<int>(out.size()), 0);
+    if (n == SOCKET_ERROR)
+        return WSAGetLastError() == WSAEWOULDBLOCK;
+    if (n <= 0)
+        return false;
+    out.erase(0, static_cast<size_t>(n));
+    return true;
+}
+
+struct Options
+{
+    bool host = false, lan = false;
+    std::string ip = "127.0.0.1", name = "player";
+    unsigned port = 27030, capacity = 8;
+};
+Options options(int argc, char **argv)
+{
+    if (argc < 2)
+        throw std::runtime_error("Use: dsr_net host|join [--address IPv4] [--port N] [--name NOME] [--max-players N] [--allow-insecure-lan]");
+    Options o;
+    const std::string mode = argv[1];
+    if (mode != "host" && mode != "join")
+        throw std::runtime_error("Modo deve ser host ou join");
+    o.host = mode == "host";
+    for (int i = 2; i < argc; ++i)
+    {
+        const std::string k = argv[i];
+        if (k == "--allow-insecure-lan")
+        {
+            o.lan = true;
+            continue;
+        }
+        if (k != "--address" && k != "--port" && k != "--name" && k != "--max-players")
+            throw std::runtime_error("Opcao desconhecida: " + k);
+        if (++i == argc)
+            throw std::runtime_error("Falta valor para " + k);
+        const std::string v = argv[i];
+        if (k == "--address")
+            o.ip = v;
+        if (k == "--port")
+            o.port = number(v, o.host ? 0u : 1u, 65535);
+        if (k == "--name")
+        {
+            if (o.host)
+                throw std::runtime_error("--name somente em join");
+            o.name = v;
+        }
+        if (k == "--max-players")
+        {
+            if (!o.host)
+                throw std::runtime_error("--max-players somente em host");
+            o.capacity = number(v, 2, 32);
+        }
+    }
+    if (!name_ok(o.name))
+        throw std::runtime_error("Nome: 1 a 24 letras ASCII, numeros, _ ou -");
+    auto a = address(o.ip, o.port);
+    const bool loopback = (ntohl(a.sin_addr.s_addr) >> 24) == 127;
+    if (!loopback && !o.lan)
+        throw std::runtime_error("Fora de loopback exige --allow-insecure-lan: protocolo SEM criptografia, somente laboratorio em LAN confiavel");
+    return o;
+}
+
+struct Peer
+{
+    SOCKET socket;
+    unsigned id = 0;
+    std::string name, input, output;
+    bool closing = false, dead = false;
+    Clock::time_point accepted = Clock::now(), last = accepted, rate_start = accepted, close_start = accepted;
+    unsigned rate_count = 0;
+};
+class Host
+{
+    std::map<SOCKET, Peer> peers;
+    std::string secret, room;
+    unsigned capacity, next_id = 1;
+    void emit(Peer &p, const std::string &line)
+    {
+        if (!queue(p.output, line))
+            p.dead = true;
+    }
+    void reject(Peer &p, const std::string &reason)
+    {
+        if (p.closing)
+            return;
+        emit(p, "ERROR\t" + reason);
+        p.closing = true;
+        p.close_start = Clock::now();
+    }
+    void broadcast(const std::string &line, unsigned except = 0)
+    {
+        for (auto &[s, p] : peers)
+        {
+            (void)s;
+            if (p.id && !p.closing && !p.dead && p.id != except)
+                emit(p, line);
+        }
+    }
+    unsigned active() const
+    {
+        return static_cast<unsigned>(std::count_if(peers.begin(), peers.end(), [](const auto &entry)
+                                                   { return entry.second.id && !entry.second.closing && !entry.second.dead; }));
+    }
+    void roster(Peer &p)
+    {
+        emit(p, "ROSTER\t" + std::to_string(active()));
+        for (const auto &[s, member] : peers)
+        {
+            (void)s;
+            if (member.id && !member.closing && !member.dead)
+                emit(p, "MEMBER\t" + std::to_string(member.id) + "\t" + member.name);
+        }
+        emit(p, "END");
+    }
+    void frame(Peer &p, const std::string &line)
+    {
+        const auto fields = split(line);
+        const auto now = Clock::now();
+        if (now - p.rate_start >= std::chrono::seconds(1))
+        {
+            p.rate_start = now;
+            p.rate_count = 0;
+        }
+        if (++p.rate_count > 100)
+        {
+            reject(p, "RATE_LIMIT");
+            return;
+        }
+        if (std::any_of(fields.begin(), fields.end(), [](const auto &f)
+                        { return !printable(f); }))
+        {
+            reject(p, "BAD_FRAME");
+            return;
+        }
+        p.last = now;
+        if (!p.id)
+        {
+            if (fields.size() != 4 || fields[0] != "HELLO")
+            {
+                reject(p, "EXPECTED_HELLO");
+                return;
+            }
+            if (fields[1] != "1")
+            {
+                reject(p, "VERSION");
+                return;
+            }
+            if (!name_ok(fields[2]))
+            {
+                reject(p, "NAME");
+                return;
+            }
+            if (fields[3] != secret)
+            {
+                reject(p, "AUTH");
+                return;
+            }
+            if (active() >= capacity)
+            {
+                reject(p, "FULL");
+                return;
+            }
+            p.id = next_id++;
+            p.name = fields[2];
+            emit(p, "WELCOME\t1\t" + room + "\t" + std::to_string(p.id) + "\t" + std::to_string(capacity));
+            roster(p);
+            broadcast("JOIN\t" + std::to_string(p.id) + "\t" + p.name, p.id);
+        }
+        else if (fields.size() == 1 && fields[0] == "WHO")
+        {
+            roster(p);
+        }
+        else if (fields.size() == 1 && fields[0] == "PING")
+        {
+            emit(p, "PONG");
+        }
+        else if (fields.size() == 1 && fields[0] == "QUIT")
+        {
+            emit(p, "BYE");
+            p.closing = true;
+            p.close_start = now;
+        }
+        else if (fields.size() == 2 && fields[0] == "SAY" && !fields[1].empty() && fields[1].size() <= MaxText)
+        {
+            broadcast("CHAT\t" + std::to_string(p.id) + "\t" + fields[1]);
+        }
+        else if (fields.size() == 3 && fields[0] == "SEND" && !fields[2].empty() && fields[2].size() <= MaxText)
+        {
+            unsigned target = 0;
+            try
+            {
+                target = number(fields[1], 1, 0xffffffffu);
+            }
+            catch (const std::exception &)
+            {
+                reject(p, "BAD_DESTINATION");
+                return;
+            }
+            for (auto &[s, other] : peers)
+            {
+                (void)s;
+                if (other.id == target && !other.closing && !other.dead)
+                {
+                    emit(other, "DATA\t" + std::to_string(p.id) + "\t" + fields[2]);
+                    return;
+                }
+            }
+            emit(p, "ERROR\tNO_SUCH_PEER");
+        }
+        else
+        {
+            reject(p, "BAD_COMMAND");
+        }
+    }
+    void receive(Peer &p)
+    {
+        std::array<char, 4096> buf{};
+        const int n = recv(p.socket, buf.data(), static_cast<int>(buf.size()), 0);
+        if (n == 0)
+        {
+            p.dead = true;
+            return;
+        }
+        if (n == SOCKET_ERROR)
+        {
+            if (WSAGetLastError() != WSAEWOULDBLOCK)
+                p.dead = true;
+            return;
+        }
+        p.input.append(buf.data(), static_cast<size_t>(n));
+        for (;;)
+        {
+            const auto end = p.input.find('\n');
+            if (end == std::string::npos)
+            {
+                if (p.input.size() > MaxFrame)
+                    reject(p, "FRAME_TOO_LARGE");
+                return;
+            }
+            if (end > MaxFrame)
+            {
+                reject(p, "FRAME_TOO_LARGE");
+                return;
+            }
+            auto line = p.input.substr(0, end);
+            p.input.erase(0, end + 1);
+            frame(p, line);
+            if (p.closing || p.dead)
+            {
+                p.input.clear();
+                return;
+            }
+        }
+    }
+
+public:
+    Host(std::string key, unsigned limit) : secret(std::move(key)), room(room_id()), capacity(limit) {}
+    ~Host()
+    {
+        for (const auto &[s, p] : peers)
+        {
+            (void)p;
+            closesocket(s);
+        }
+    }
+    void run(const Options &o)
+    {
+        Socket listener(socket(AF_INET, SOCK_STREAM, IPPROTO_TCP));
+        if (listener.value == INVALID_SOCKET)
+            net_error("socket");
+        const BOOL exclusive = TRUE;
+        if (setsockopt(listener.value, SOL_SOCKET, SO_EXCLUSIVEADDRUSE, reinterpret_cast<const char *>(&exclusive), sizeof(exclusive)))
+            net_error("exclusive bind");
+        auto a = address(o.ip, o.port);
+        if (bind(listener.value, reinterpret_cast<sockaddr *>(&a), sizeof(a)))
+            net_error("bind");
+        if (listen(listener.value, SOMAXCONN))
+            net_error("listen");
+        nonblocking(listener.value);
+        int size = sizeof(a);
+        if (getsockname(listener.value, reinterpret_cast<sockaddr *>(&a), &size))
+            net_error("getsockname");
+        std::cout << "SERVER_READY\t" << o.ip << '\t' << ntohs(a.sin_port) << '\t' << room << '\t' << capacity << std::endl;
+        for (;;)
+        {
+            fd_set reads, writes;
+            FD_ZERO(&reads);
+            FD_ZERO(&writes);
+            FD_SET(listener.value, &reads);
+            for (const auto &[s, p] : peers)
+            {
+                if (!p.closing && !p.dead)
+                    FD_SET(s, &reads);
+                if (!p.output.empty() && !p.dead)
+                    FD_SET(s, &writes);
+            }
+            timeval timeout{0, 50000};
+            if (select(0, &reads, &writes, nullptr, &timeout) == SOCKET_ERROR)
+                net_error("select");
+            // Only service descriptors present before select; accept after processing.
+            for (auto &[s, p] : peers)
+            {
+                if (FD_ISSET(s, &reads))
+                    receive(p);
+                if (!p.dead && FD_ISSET(s, &writes) && !flush(s, p.output))
+                    p.dead = true;
+                const auto now = Clock::now();
+                if (!p.id && !p.closing && now - p.accepted > std::chrono::seconds(5))
+                    reject(p, "HANDSHAKE_TIMEOUT");
+                if (p.id && !p.closing && now - p.last > std::chrono::seconds(30))
+                    reject(p, "IDLE_TIMEOUT");
+                if (p.closing && (p.output.empty() || now - p.close_start > std::chrono::seconds(2)))
+                    p.dead = true;
+            }
+            std::vector<unsigned> departed;
+            for (auto it = peers.begin(); it != peers.end();)
+            {
+                if (!it->second.dead)
+                {
+                    ++it;
+                    continue;
+                }
+                if (it->second.id)
+                    departed.push_back(it->second.id);
+                closesocket(it->first);
+                it = peers.erase(it);
+            }
+            for (auto id : departed)
+                broadcast("LEFT\t" + std::to_string(id));
+            if (FD_ISSET(listener.value, &reads))
+            {
+                Socket incoming(accept(listener.value, nullptr, nullptr));
+                if (incoming.value == INVALID_SOCKET)
+                {
+                    if (WSAGetLastError() != WSAEWOULDBLOCK)
+                        net_error("accept");
+                    continue;
+                }
+                if (peers.size() >= static_cast<size_t>(capacity + MaxPending))
+                    continue;
+                nonblocking(incoming.value);
+                const SOCKET s = incoming.value;
+                Peer p{};
+                p.socket = s;
+                peers.emplace(s, std::move(p));
+                incoming.value = INVALID_SOCKET;
+            }
+        }
+    }
+};
+
+// Poll stdin without a background thread, so host disconnect never hangs on getline.
+class Input
+{
+    HANDLE handle = GetStdHandle(STD_INPUT_HANDLE);
+    bool console = false, ended = false;
+    std::string pending;
+
+public:
+    Input()
+    {
+        DWORD mode = 0;
+        console = GetConsoleMode(handle, &mode) != 0;
+    }
+    bool eof() const { return ended; }
+    std::vector<std::string> poll()
+    {
+        std::vector<std::string> lines;
+        auto consume = [&](char c)
+        {
+            if (c == '\r')
+            {
+                if (!console)
+                    return;
+                c = '\n';
+            }
+            if (c == '\n')
+            {
+                lines.push_back(pending);
+                pending.clear();
+                if (console)
+                    std::cout << '\n';
+            }
+            else if (c == '\b' && console)
+            {
+                if (!pending.empty())
+                {
+                    pending.pop_back();
+                    std::cout << "\b \b";
+                }
+            }
+            else
+            {
+                if (pending.size() >= MaxFrame)
+                    throw std::runtime_error("Entrada local excede limite");
+                pending += c;
+                if (console)
+                    std::cout << c << std::flush;
+            }
+        };
+        if (ended)
+            return lines;
+        if (console)
+        {
+            for (int i = 0; i < 256 && _kbhit(); ++i)
+            {
+                const int c = _getch();
+                if (c == 0 || c == 224)
+                {
+                    (void)_getch();
+                    continue;
+                }
+                if (c == 26)
+                {
+                    ended = true;
+                    break;
+                }
+                consume(static_cast<char>(c));
+            }
+        }
+        else
+        {
+            DWORD available = 0;
+            const DWORD type = GetFileType(handle);
+            if (type == FILE_TYPE_PIPE && !PeekNamedPipe(handle, nullptr, 0, nullptr, &available, nullptr))
+            {
+                if (GetLastError() == ERROR_BROKEN_PIPE)
+                    ended = true;
+                else
+                    throw std::runtime_error("Nao foi possivel consultar stdin");
+            }
+            else if (type == FILE_TYPE_DISK || (type == FILE_TYPE_PIPE && available))
+            {
+                std::array<char, 512> buf{};
+                DWORD count = 0;
+                const DWORD wanted = type == FILE_TYPE_DISK ? static_cast<DWORD>(buf.size()) : std::min(available, static_cast<DWORD>(buf.size()));
+                if (!ReadFile(handle, buf.data(), wanted, &count, nullptr) || !count)
+                    ended = true;
+                else
+                    for (DWORD i = 0; i < count; ++i)
+                        consume(buf[i]);
+            }
+            else if (type != FILE_TYPE_PIPE)
+                ended = true;
+        }
+        if (ended && !pending.empty())
+        {
+            lines.push_back(pending);
+            pending.clear();
+        }
+        return lines;
+    }
+};
+int join(const Options &o, const std::string &secret)
+{
+    Socket sock(socket(AF_INET, SOCK_STREAM, IPPROTO_TCP));
+    if (sock.value == INVALID_SOCKET)
+        net_error("socket");
+    nonblocking(sock.value);
+    auto a = address(o.ip, o.port);
+    if (connect(sock.value, reinterpret_cast<sockaddr *>(&a), sizeof(a)) == SOCKET_ERROR)
+    {
+        if (WSAGetLastError() != WSAEWOULDBLOCK)
+            net_error("connect");
+        fd_set w, e;
+        FD_ZERO(&w);
+        FD_ZERO(&e);
+        FD_SET(sock.value, &w);
+        FD_SET(sock.value, &e);
+        timeval wait{5, 0};
+        const int n = select(0, nullptr, &w, &e, &wait);
+        if (n == SOCKET_ERROR)
+            net_error("connect select");
+        if (!n)
+            throw std::runtime_error("Timeout ao conectar");
+        int error = 0, size = sizeof(error);
+        if (getsockopt(sock.value, SOL_SOCKET, SO_ERROR, reinterpret_cast<char *>(&error), &size))
+            net_error("connect status");
+        if (error || FD_ISSET(sock.value, &e))
+            throw std::runtime_error("Conexao recusada/falhou: " + std::to_string(error));
+    }
+    std::string out, in;
+    queue(out, "HELLO\t1\t" + o.name + "\t" + secret);
+    Input input;
+    bool welcomed = false, quitting = false, failed = false;
+    const auto connected = Clock::now();
+    auto last_received = connected, last_ping = connected, quit_start = connected;
+    std::cout << "Comandos: texto, /who, /send ID texto, /quit. ASCII neste prototipo." << std::endl;
+    for (;;)
+    {
+        fd_set r, w;
+        FD_ZERO(&r);
+        FD_ZERO(&w);
+        FD_SET(sock.value, &r);
+        if (!out.empty())
+            FD_SET(sock.value, &w);
+        timeval wait{0, 50000};
+        if (select(0, &r, &w, nullptr, &wait) == SOCKET_ERROR)
+            net_error("client select");
+        if (FD_ISSET(sock.value, &w) && !flush(sock.value, out))
+            throw std::runtime_error("Falha no envio");
+        if (FD_ISSET(sock.value, &r))
+        {
+            std::array<char, 4096> buf{};
+            const int n = recv(sock.value, buf.data(), static_cast<int>(buf.size()), 0);
+            if (n == 0)
+            {
+                std::cout << "DISCONNECTED" << std::endl;
+                return welcomed && !failed ? 0 : 1;
+            }
+            if (n == SOCKET_ERROR)
+            {
+                if (WSAGetLastError() != WSAEWOULDBLOCK)
+                    net_error("client recv");
+            }
+            else
+            {
+                in.append(buf.data(), static_cast<size_t>(n));
+                last_received = Clock::now();
+            }
+            for (;;)
+            {
+                auto end = in.find('\n');
+                if (end == std::string::npos)
+                {
+                    if (in.size() > MaxFrame)
+                        throw std::runtime_error("Frame remoto excede limite");
+                    break;
+                }
+                if (end > MaxFrame)
+                    throw std::runtime_error("Frame remoto excede limite");
+                auto line = in.substr(0, end);
+                in.erase(0, end + 1);
+                const auto fields = split(line);
+                if (std::any_of(fields.begin(), fields.end(), [](const auto &f)
+                                { return !printable(f); }))
+                    throw std::runtime_error("Frame remoto invalido");
+                if (line.rfind("WELCOME\t1\t", 0) == 0)
+                    welcomed = true;
+                if (line.rfind("ERROR\t", 0) == 0)
+                    failed = true;
+                if (line != "PONG")
+                    std::cout << line << std::endl;
+            }
+        }
+        const auto now = Clock::now();
+        if (!welcomed && now - connected > std::chrono::seconds(7))
+            throw std::runtime_error("Timeout na admissao");
+        if (now - last_received > std::chrono::seconds(35))
+            throw std::runtime_error("Host sem resposta");
+        if (quitting && now - quit_start > std::chrono::seconds(3))
+            return failed ? 1 : 0;
+        auto send_line = [&](const std::string &line)
+        {
+            if (!queue(out, line))
+                throw std::runtime_error("Fila de envio excede limite");
+        };
+        auto quit = [&]()
+        { send_line("QUIT"); quitting = true; quit_start = now; };
+        if (welcomed && !quitting)
+        {
+            for (const auto &line : input.poll())
+            {
+                if (line.empty())
+                    continue;
+                if (!printable(line))
+                    throw std::runtime_error("Somente ASCII imprimivel neste prototipo");
+                if (line == "/quit")
+                {
+                    quit();
+                    break;
+                }
+                if (line == "/who")
+                    send_line("WHO");
+                else if (line.rfind("/send ", 0) == 0)
+                {
+                    const auto end = line.find(' ', 6);
+                    if (end == std::string::npos || end + 1 == line.size() || line.size() - end - 1 > MaxText)
+                        throw std::runtime_error("Use /send ID texto (ate 1024 bytes)");
+                    const auto id = number(std::string_view(line).substr(6, end - 6), 1, 0xffffffffu);
+                    send_line("SEND\t" + std::to_string(id) + "\t" + line.substr(end + 1));
+                }
+                else
+                {
+                    if (line.size() > MaxText)
+                        throw std::runtime_error("Texto excede 1024 bytes");
+                    send_line("SAY\t" + line);
+                }
+            }
+            if (input.eof() && !quitting)
+                quit();
+            if (!quitting && now - last_ping > std::chrono::seconds(5))
+            {
+                send_line("PING");
+                last_ping = now;
+            }
+        }
+    }
+}
+int main(int argc, char **argv)
+{
+    try
+    {
+        const auto o = options(argc, argv);
+        const auto secret = password();
+        Winsock network;
+        if (o.lan)
+            std::cerr << "AVISO: laboratorio sem criptografia. Nao exponha a Internet.\n";
+        if (o.host)
+        {
+            Host server(secret, o.capacity);
+            server.run(o);
+            return 0;
+        }
+        return join(o, secret);
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << "Erro: " << e.what() << std::endl;
+        return 1;
+    }
+}
