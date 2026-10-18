@@ -9,17 +9,17 @@ namespace dsr
 {
 movement::Identity parse_identity(const std::string &hex)
 {
-    if (hex.size() != 32) throw std::runtime_error("UDP: ID deve ter 32 digitos hexadecimais");
+    if (hex.size() != 32) throw std::runtime_error("UDP: ID must contain 32 hexadecimal digits");
     auto nibble = [](char c) -> unsigned {
         if (c >= '0' && c <= '9') return static_cast<unsigned>(c - '0');
         if (c >= 'a' && c <= 'f') return static_cast<unsigned>(c - 'a' + 10);
-        throw std::runtime_error("UDP: ID hexadecimal invalido");
+        throw std::runtime_error("UDP: invalid hexadecimal ID");
     };
     movement::Identity result{};
     for (std::size_t i = 0; i < result.size(); ++i)
         result[i] = static_cast<unsigned char>((nibble(hex[i * 2]) << 4) | nibble(hex[i * 2 + 1]));
     if (std::all_of(result.begin(), result.end(), [](auto b) { return b == 0; }))
-        throw std::runtime_error("UDP: ID nulo");
+        throw std::runtime_error("UDP: zero ID");
     return result;
 }
 
@@ -36,7 +36,7 @@ movement::Identity new_identity()
     do
     {
         if (BCryptGenRandom(nullptr, result.data(), static_cast<ULONG>(result.size()), BCRYPT_USE_SYSTEM_PREFERRED_RNG))
-            throw std::runtime_error("UDP: geracao de ID falhou");
+            throw std::runtime_error("UDP: ID generation failed");
     } while (std::all_of(result.begin(), result.end(), [](auto b) { return b == 0; }));
     return result;
 }
@@ -46,7 +46,7 @@ MovementLink::MovementLink(SOCKET tcp, unsigned owner) : socket_(tcp), owner_(ow
 void MovementLink::establish(TlsChannel &tls, bool server, const movement::Identity &session,
                              const movement::Identity &connection, unsigned port, const std::string &library)
 {
-    if (channel_) throw std::runtime_error("UDP: renegociacao nao permitida; reconecte");
+    if (channel_) throw std::runtime_error("UDP: renegotiation is not allowed; reconnect");
     session_ = session; connection_ = connection;
     input_ = std::make_unique<movement::Stream>(movement::Kind::Input, session, connection, owner_);
     std::array<unsigned char, 32> context{};
@@ -68,22 +68,28 @@ std::vector<movement::Packet> MovementLink::poll()
     if (!channel_) return packets;
     const auto now = Clock::now();
     if (now - rate_time_ >= std::chrono::seconds(1)) { rate_time_ = now; rate_count_ = 0; input_count_ = 0; }
-    for (const auto &bytes : channel_->poll())
+    std::vector<std::vector<unsigned char>> received;
+    try { received = channel_->poll(); }
+    catch (...) { metrics.transport(channel_->send_stats()); throw; }
+    metrics.transport(channel_->send_stats());
+    for (const auto &bytes : received)
     {
         // Hard bound even for authenticated malformed records. Invalid records don't
         // refresh liveness or move sequence cursors. DTLS drops unauthenticated ones.
-        if (++rate_count_ > 400) throw std::runtime_error("UDP: limite de registros excedido");
+        if (++rate_count_ > 400) throw std::runtime_error("UDP: record limit exceeded");
         try
         {
             auto packet = movement::decode(bytes.data(), bytes.size());
             if (packet.session != session_ || packet.connection != connection_) continue;
             if (packet.kind == movement::Kind::Input && ++input_count_ > 60) continue;
+            metrics.received(packet);
             packets.push_back(packet);
         }
         catch (const std::runtime_error &) { /* discard malformed payload */ }
     }
     // Before any position is proposed, DTLS can be ready without application input.
     // TCP PING remains the session liveness mechanism; no unsafe endpoint rebinding.
+    metrics.report();
     return packets;
 }
 
@@ -91,7 +97,11 @@ bool MovementLink::send(movement::Kind kind, unsigned entity, std::uint64_t sequ
 {
     if (!ready()) return false;
     const auto bytes = movement::encode({kind, session_, connection_, sequence, entity, position});
-    return channel_->send(bytes.data(), bytes.size());
+    bool admitted;
+    try { admitted = channel_->send(bytes.data(), bytes.size()); }
+    catch (...) { metrics.transport(channel_->send_stats()); throw; }
+    metrics.transport(channel_->send_stats());
+    return admitted;
 }
 
 void MovementLink::publish_input()
@@ -99,8 +109,9 @@ void MovementLink::publish_input()
     const auto now = Clock::now();
     if (!desired_ || !ready() || now - input_time_ < std::chrono::milliseconds(34)) return;
     if (sequence_ >= (std::numeric_limits<std::uint64_t>::max)() - 2)
-        throw std::runtime_error("UDP: sequencia esgotada; reconecte");
-    if (send(movement::Kind::Input, owner_, ++sequence_, *desired_)) input_time_ = now;
+        throw std::runtime_error("UDP: sequence exhausted; reconnect");
+    if (send(movement::Kind::Input, owner_, sequence_ + 1, *desired_))
+    { ++sequence_; input_time_ = now; }
 }
 
 bool MovementLink::state_due(unsigned peers)
@@ -117,5 +128,5 @@ bool MovementLink::state_due(unsigned peers)
 bool MovementLink::accepts_input(const movement::Packet &packet) const
 { return input_ && input_->eligible(packet); }
 void MovementLink::commit_input(const movement::Packet &packet)
-{ if (!input_ || !input_->commit(packet)) throw std::runtime_error("UDP: cursor de entrada inconsistente"); }
+{ if (!input_ || !input_->commit(packet)) throw std::runtime_error("UDP: inconsistent input cursor"); }
 } // namespace dsr

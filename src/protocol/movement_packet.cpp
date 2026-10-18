@@ -55,7 +55,7 @@ bool valid(const Packet &p)
 
 Bytes encode(const Packet &p)
 {
-    if (!valid(p)) throw std::runtime_error("Movimento: campos invalidos");
+    if (!valid(p)) throw std::runtime_error("Movement: invalid fields");
     Bytes bytes{};
     bytes[0] = 'D'; bytes[1] = 'S'; bytes[2] = 'R'; bytes[3] = 'M';
     bytes[4] = Version;
@@ -73,11 +73,11 @@ Bytes encode(const Packet &p)
 
 Packet decode(const std::uint8_t *data, std::size_t size)
 {
-    if (!data || size != PacketSize) throw std::runtime_error("Movimento: tamanho invalido");
+    if (!data || size != PacketSize) throw std::runtime_error("Movement: invalid size");
     if (data[0] != 'D' || data[1] != 'S' || data[2] != 'R' || data[3] != 'M' ||
         data[4] != Version || get(data, 6, 2) != 0 || get(data, 8, 2) != PacketSize ||
         get(data, 10, 2) != 0)
-        throw std::runtime_error("Movimento: cabecalho incompativel");
+        throw std::runtime_error("Movement: incompatible header");
     Packet p;
     p.kind = static_cast<Kind>(data[5]);
     std::copy_n(data + 12, 16, p.session.begin());
@@ -85,7 +85,7 @@ Packet decode(const std::uint8_t *data, std::size_t size)
     p.sequence = get(data, 44, 8);
     p.entity = static_cast<std::uint32_t>(get(data, 52, 4));
     p.position = {unquantize(data, 56), unquantize(data, 60), unquantize(data, 64)};
-    if (!valid(p)) throw std::runtime_error("Movimento: campos invalidos");
+    if (!valid(p)) throw std::runtime_error("Movement: invalid fields");
     return p;
 }
 } // namespace dsr::movement

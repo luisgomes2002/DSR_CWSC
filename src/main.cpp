@@ -11,22 +11,22 @@ int main(int argc, char **argv)
     using namespace dsr;
     try
     {
-        const auto o = options(argc, argv);
-        const auto secret = password();
+        const auto parsed_options = options(argc, argv);
+        const auto room_password = password();
         Winsock network;
-        if (o.tls_pfx.empty() && o.tls_pin.empty())
-            std::cerr << "AVISO: modo local sem criptografia, restrito a loopback.\n";
-        if (o.host)
+        if (parsed_options.tls_pfx.empty() && parsed_options.tls_pin.empty())
+            std::cerr << "WARNING: unencrypted local mode is restricted to loopback.\n";
+        if (parsed_options.host)
         {
-            Host server(secret, o.capacity);
-            server.run(o);
+            Host server(room_password, parsed_options.capacity);
+            server.run(parsed_options);
             return 0;
         }
-        return join(o, secret);
+        return join(parsed_options, room_password);
     }
     catch (const std::exception &e)
     {
-        std::cerr << "Erro: " << e.what() << std::endl;
+        std::cerr << "Error: " << e.what() << std::endl;
         return 1;
     }
 }

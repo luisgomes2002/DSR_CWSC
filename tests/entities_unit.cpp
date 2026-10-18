@@ -15,13 +15,13 @@ namespace
 {
 void check(bool condition)
 {
-    if (!condition) throw std::runtime_error("Verificacao falhou");
+    if (!condition) throw std::runtime_error("Verification failed");
 }
 template <typename F> void must_throw(F action)
 {
     try { action(); }
     catch (const std::runtime_error &) { return; }
-    throw std::runtime_error("Entrada invalida foi aceita");
+    throw std::runtime_error("Invalid input was accepted");
 }
 void consume(dsr::PlayerReplica &replica, const std::string &line)
 {

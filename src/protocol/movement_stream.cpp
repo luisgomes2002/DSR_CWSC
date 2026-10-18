@@ -11,7 +11,7 @@ Stream::Stream(Kind kind, Identity session, Identity connection, std::uint32_t e
 {
     if (!valid(Packet{kind, session, connection, 1, entity, {}}) ||
         baseline == (std::numeric_limits<std::uint64_t>::max)())
-        throw std::runtime_error("Movimento: stream invalido");
+        throw std::runtime_error("Movement: invalid stream");
 }
 
 bool Stream::eligible(const Packet &p) const

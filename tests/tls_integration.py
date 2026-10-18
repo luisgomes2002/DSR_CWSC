@@ -133,7 +133,7 @@ class TlsTests(unittest.TestCase):
             self.assertFalse(thread.is_alive())
             self.assertEqual(observed.get(timeout=1), b"")
             self.assertNotEqual(result.returncode, 0)
-            self.assertIn("impressao digital incorreta", result.stderr)
+            self.assertIn("certificate fingerprint does not match", result.stderr)
             self.assertNotIn("WELCOME", result.stdout)
 
     def test_07_external_plaintext_and_old_insecure_flag_rejected(self):
@@ -177,7 +177,7 @@ class TlsTests(unittest.TestCase):
                     self.assertTrue(received)
                     incoming.write(received)
             else:
-                self.fail("Handshake TLS nao completou")
+                self.fail("TLS handshake did not complete")
             pending = outgoing.read()
             if pending:
                 raw.sendall(pending)
@@ -232,7 +232,7 @@ class TlsTests(unittest.TestCase):
                         relay(back, front, False)
                         worker.join(timeout=6)
                         if worker.is_alive():
-                            failures.put("relay nao encerrou")
+                            failures.put("relay did not close")
                 except Exception as error:
                     failures.put(error)
 

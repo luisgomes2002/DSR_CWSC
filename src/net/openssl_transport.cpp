@@ -116,7 +116,7 @@ namespace dsr
                 // Avoid external configuration and callbacks into an unloaded dynamic library.
                 constexpr std::uint64_t init_flags = 0x00000080 | 0x00080000;
                 if (OPENSSL_init_ssl(init_flags, nullptr) != 1)
-                    throw std::runtime_error("TLS: inicializacao OpenSSL falhou");
+                    throw std::runtime_error("TLS: OpenSSL initialization failed");
             }
             ~Api() { OPENSSL_thread_stop(); }
         };
@@ -125,14 +125,14 @@ namespace dsr
         {
             const int length = api.i2d_X509(cert, nullptr);
             if (length <= 0 || length > 1024 * 1024)
-                throw std::runtime_error("TLS: certificado invalido");
+                throw std::runtime_error("TLS: invalid certificate");
             std::vector<unsigned char> der(static_cast<std::size_t>(length));
             auto ptr = der.data();
             if (api.i2d_X509(cert, &ptr) != length)
-                throw std::runtime_error("TLS: certificado invalido");
+                throw std::runtime_error("TLS: invalid certificate");
             PCCERT_CONTEXT parsed = CertCreateCertificateContext(X509_ASN_ENCODING, der.data(), static_cast<DWORD>(der.size()));
             if (!parsed)
-                throw std::runtime_error("TLS: certificado invalido");
+                throw std::runtime_error("TLS: invalid certificate");
             const bool valid = CertVerifyTimeValidity(nullptr, parsed->pCertInfo) == 0;
             CertFreeCertificateContext(parsed);
             if (!valid)
@@ -140,7 +140,7 @@ namespace dsr
             std::array<unsigned char, 32> digest{};
             DWORD count = static_cast<DWORD>(digest.size());
             if (!CryptHashCertificate2(BCRYPT_SHA256_ALGORITHM, 0, nullptr, der.data(), static_cast<DWORD>(der.size()), digest.data(), &count))
-                throw std::runtime_error("TLS: hash do certificado falhou");
+                throw std::runtime_error("TLS: certificate hashing failed");
             std::string pin;
             for (auto b : digest)
             {
@@ -175,31 +175,31 @@ namespace dsr
         impl_->server = !pfx.empty();
         impl_->context = a.SSL_CTX_new(impl_->server ? a.TLS_server_method() : a.TLS_client_method());
         if (!impl_->context)
-            throw std::runtime_error("TLS: contexto OpenSSL falhou");
+            throw std::runtime_error("TLS: OpenSSL context creation failed");
         auto *ctx = impl_->context;
         if (a.SSL_CTX_ctrl(ctx, SetMinVersion, Tls12, nullptr) != 1 || a.SSL_CTX_ctrl(ctx, SetMaxVersion, Tls12, nullptr) != 1 ||
             a.SSL_CTX_set_cipher_list(ctx, "ECDHE+AESGCM:ECDHE+CHACHA20") != 1)
-            throw std::runtime_error("TLS: configuracao OpenSSL falhou");
+            throw std::runtime_error("TLS: OpenSSL configuration failed");
         a.SSL_CTX_set_options(ctx, std::uint64_t{1} << 30); // SSL_OP_NO_RENEGOTIATION
         if (!impl_->server)
             return;
         std::ifstream file(std::filesystem::u8path(pfx), std::ios::binary | std::ios::ate);
         if (!file || file.tellg() <= 0 || file.tellg() > 1024 * 1024)
-            throw std::runtime_error("TLS: PFX ausente ou invalido");
+            throw std::runtime_error("TLS: PFX is missing or invalid");
         const auto length = static_cast<std::size_t>(file.tellg());
         file.seekg(0);
         std::vector<unsigned char> bytes(length);
         if (!file.read(reinterpret_cast<char *>(bytes.data()), static_cast<std::streamsize>(length)))
-            throw std::runtime_error("TLS: leitura PFX falhou");
+            throw std::runtime_error("TLS: PFX read failed");
         const char *env = std::getenv("DSR_TLS_PFX_PASSWORD");
         std::string password = env ? env : "";
         if (password.size() < 12 || password.size() > 128 || !std::all_of(password.begin(), password.end(), [](unsigned char c)
                                                                           { return c >= 32 && c <= 126; }))
-            throw std::runtime_error("Defina DSR_TLS_PFX_PASSWORD com 12 a 128 caracteres ASCII");
+            throw std::runtime_error("Set DSR_TLS_PFX_PASSWORD to 12-128 printable ASCII characters");
         const auto *cursor = bytes.data();
         auto *bundle = a.d2i_PKCS12(nullptr, &cursor, static_cast<long>(bytes.size()));
         if (!bundle)
-            throw std::runtime_error("TLS: arquivo PFX invalido");
+            throw std::runtime_error("TLS: invalid PFX file");
         EVP_PKEY *raw_key = nullptr;
         X509 *raw_cert = nullptr;
         const auto parsed = a.PKCS12_parse(bundle, password.c_str(), &raw_key, &raw_cert, nullptr);
@@ -208,11 +208,11 @@ namespace dsr
         std::unique_ptr<EVP_PKEY, decltype(a.EVP_PKEY_free)> key(raw_key, a.EVP_PKEY_free);
         std::unique_ptr<X509, decltype(a.X509_free)> cert(raw_cert, a.X509_free);
         if (!parsed || !key || !cert)
-            throw std::runtime_error("TLS: PFX/senha invalido");
+            throw std::runtime_error("TLS: invalid PFX or password");
         impl_->pin = hash_and_validate(a, cert.get());
         if (a.SSL_CTX_use_certificate(ctx, cert.get()) != 1 || a.SSL_CTX_use_PrivateKey(ctx, key.get()) != 1 ||
             a.SSL_CTX_check_private_key(ctx) != 1)
-            throw std::runtime_error("TLS: configuracao OpenSSL falhou");
+            throw std::runtime_error("TLS: OpenSSL configuration failed");
     }
     OpenSslContext::~OpenSslContext() = default;
     const std::string &OpenSslContext::fingerprint() const { return impl_->pin; }
@@ -239,9 +239,9 @@ namespace dsr
             {
                 const int n = api().BIO_read(output, bytes.data(), static_cast<int>(bytes.size()));
                 if (n <= 0)
-                    throw std::runtime_error("TLS: falha de buffer cifrado");
+                    throw std::runtime_error("TLS: encrypted buffer operation failed");
                 if (wire_output.size() + static_cast<std::size_t>(n) > CipherLimit)
-                    throw std::runtime_error("TLS: limite de saida excedido");
+                    throw std::runtime_error("TLS: output limit exceeded");
                 wire_output.append(bytes.data(), static_cast<std::size_t>(n));
             }
         }
@@ -259,17 +259,17 @@ namespace dsr
                     {
                         auto *raw = api().SSL_get1_peer_certificate(session);
                         if (!raw)
-                            throw std::runtime_error("TLS: host sem certificado");
+                            throw std::runtime_error("TLS: host did not provide a certificate");
                         std::unique_ptr<X509, decltype(api().X509_free)> cert(raw, api().X509_free);
                         if (hash_and_validate(api(), cert.get()) != expected_pin)
-                            throw std::runtime_error("TLS: impressao digital incorreta; senha nao enviada");
+                            throw std::runtime_error("TLS: certificate fingerprint does not match; password was not sent");
                     }
                     ready = true;
                 }
                 else if (error == WantRead || error == WantWrite)
                     return true;
                 else
-                    throw std::runtime_error("TLS: handshake do host falhou");
+                    throw std::runtime_error("TLS: host handshake failed");
             }
             std::array<char, 4096> data{};
             for (;;)
@@ -285,7 +285,7 @@ namespace dsr
                 else if (error == ZeroReturn)
                     return false;
                 else
-                    throw std::runtime_error("TLS: registro recebido invalido");
+                    throw std::runtime_error("TLS: invalid received record");
             }
         }
     };
@@ -297,7 +297,7 @@ namespace dsr
         auto &a = p.api();
         p.session = a.SSL_new(p.server->impl_->context);
         if (!p.session)
-            throw std::runtime_error("TLS: sessao OpenSSL falhou");
+            throw std::runtime_error("TLS: OpenSSL session creation failed");
         p.input = a.BIO_new(a.BIO_s_mem());
         p.output = a.BIO_new(a.BIO_s_mem());
         if (!p.input || !p.output)
@@ -323,7 +323,7 @@ namespace dsr
     bool OpenSslSession::wants_write() const { return !impl_->wire_output.empty(); }
     std::array<unsigned char, 32> OpenSslSession::export_udp_key(const std::array<unsigned char, 32> &context)
     {
-        if (!ready()) throw std::runtime_error("UDP: TLS ainda nao autenticado");
+        if (!ready()) throw std::runtime_error("UDP: TLS is not authenticated yet");
         if (impl_->api().SSL_ctrl(impl_->session, 122, 0, nullptr) != 1) // Extended Master Secret
             throw std::runtime_error("UDP: TLS exige Extended Master Secret para o exporter");
         constexpr char label[] = "EXPORTER-dsr-network-movement-v1";
@@ -332,7 +332,7 @@ namespace dsr
             label, sizeof(label) - 1, context.data(), context.size(), 1) != 1)
         {
             SecureZeroMemory(key.data(), key.size());
-            throw std::runtime_error("UDP: derivacao da chave falhou");
+            throw std::runtime_error("UDP: key derivation failed");
         }
         return key;
     }
@@ -346,9 +346,9 @@ namespace dsr
         if (n == SOCKET_ERROR)
             return WSAGetLastError() == WSAEWOULDBLOCK;
         if (p.api().BIO_ctrl_pending(p.input) + static_cast<std::size_t>(n) > CipherLimit)
-            throw std::runtime_error("TLS: limite de entrada excedido");
+            throw std::runtime_error("TLS: input limit exceeded");
         if (p.api().BIO_write(p.input, data.data(), n) != n)
-            throw std::runtime_error("TLS: buffer de entrada falhou");
+            throw std::runtime_error("TLS: input buffer operation failed");
         return p.process(plaintext);
     }
     bool OpenSslSession::send(SOCKET socket, std::string &plaintext)
@@ -361,7 +361,7 @@ namespace dsr
             const auto size = (std::min)(plaintext.size(), std::size_t{16384});
             const int n = p.api().SSL_write(p.session, plaintext.data(), static_cast<int>(size));
             if (n <= 0)
-                throw std::runtime_error("TLS: envio cifrado falhou");
+                throw std::runtime_error("TLS: encrypted send failed");
             plaintext.erase(0, static_cast<std::size_t>(n));
             p.drain();
         }

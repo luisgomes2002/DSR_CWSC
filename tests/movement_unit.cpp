@@ -2,6 +2,7 @@
 #include "protocol/movement_stream.hpp"
 #include "client/player_replica.hpp"
 #include "protocol/protocol.hpp"
+#include "session/movement_metrics.hpp"
 
 #include <cmath>
 #include <functional>
@@ -10,15 +11,16 @@
 #include <stdexcept>
 #include <utility>
 #include <vector>
+#include <sstream>
 
 namespace
 {
 using namespace dsr::movement;
-void check(bool ok) { if (!ok) throw std::runtime_error("Verificacao falhou"); }
+void check(bool ok) { if (!ok) throw std::runtime_error("Verification failed"); }
 template <typename F> void must_throw(F action)
 {
     try { action(); } catch (const std::runtime_error &) { return; }
-    throw std::runtime_error("Entrada invalida aceita");
+    throw std::runtime_error("Invalid input was accepted");
 }
 Packet sample()
 {
@@ -36,6 +38,62 @@ Packet unpack(const Bytes &b) { return decode(b.data(), b.size()); }
 int main()
 {
     const std::vector<std::pair<const char *, std::function<void()>>> tests{
+        {"metric_samples_and_variation", [] {
+            dsr::MetricSamples values;
+            check(values.mean() == 0 && values.variation() == 0);
+            values.add(10); values.add(30); values.add(20);
+            check(values.count == 3 && values.mean() == 20 && values.maximum == 30);
+            check(values.variation() == 15);
+        }},
+        {"transport_metrics_count_completed_not_pending_writes", [] {
+            dsr::MovementMetrics metrics; metrics.enable(false, 7);
+            dsr::DtlsSendStats stats;
+            stats.pending_bytes = 68; stats.peak_pending_bytes = 68;
+            stats.want_write = 1; stats.suppressed = 5; stats.write_attempts = 1;
+            metrics.transport(stats);
+            std::ostringstream output;
+            auto *previous = std::cout.rdbuf(output.rdbuf());
+            metrics.report(true);
+            stats.pending_bytes = 0; stats.records_sent = 1; stats.write_attempts = 2;
+            metrics.transport(stats); metrics.report(true);
+            std::cout.rdbuf(previous);
+            const auto text = output.str();
+            check(text.find("\"payload_sent_bytes\":0") != std::string::npos);
+            check(text.find("\"payload_sent_bytes\":68") != std::string::npos);
+            check(text.find("\"dtls_send_suppressed\":5") != std::string::npos);
+            check(text.find("\"dtls_pending_bytes\":68") != std::string::npos);
+            check(text.find("\"dtls_pending_bytes\":0") != std::string::npos);
+        }},
+        {"movement_metrics_sequence_and_local_timing", [] {
+            dsr::MovementMetrics metrics;
+            metrics.enable(true, 7);
+            auto packet = sample(); packet.entity = 7; packet.sequence = 1;
+            const auto start = std::chrono::steady_clock::now();
+            metrics.received(packet, start);
+            packet.sequence = 3;
+            metrics.received(packet, start + std::chrono::milliseconds(20));
+            metrics.received(packet, start + std::chrono::milliseconds(30)); // duplicate
+            packet.sequence = 2;
+            metrics.received(packet, start + std::chrono::milliseconds(35)); // stale
+            packet.sequence = 4;
+            metrics.received(packet, start + std::chrono::milliseconds(60));
+            metrics.sent(); metrics.rtt(10); metrics.rtt(30);
+            metrics.control_queue(65536);
+            metrics.control_queue(65536, true);
+            metrics.control_queue(0);
+            std::ostringstream output;
+            auto *previous = std::cout.rdbuf(output.rdbuf());
+            metrics.report(true);
+            std::cout.rdbuf(previous);
+            const auto json = output.str();
+            for (const auto field : {"\"input_sequence_gaps_observed\":1", "\"duplicate_revision\":1",
+                "\"stale_revision\":1", "\"update_interval_samples\":2", "\"update_interval_mean_ms\":30",
+                "\"update_interval_variation_mean_ms\":20", "\"payload_sent_bytes\":68",
+                "\"payload_received_bytes\":340", "\"tcp_rtt_samples\":2", "\"tcp_rtt_mean_ms\":20",
+                "\"update_interval_histogram\":[1,1,0,0,0,0,0,0,0]",
+                "\"control_queue_bytes\":0", "\"control_queue_peak_bytes\":65536", "\"control_queue_rejections\":1"})
+                check(json.find(field) != std::string::npos);
+        }},
         {"wire_golden_vector", [] {
             const Bytes expected{
                 0x44,0x53,0x52,0x4d, 1,1,0,0, 0,0x44,0,0,

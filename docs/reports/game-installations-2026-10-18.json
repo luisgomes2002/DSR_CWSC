@@ -1,0 +1,486 @@
+{
+    "schema":  1,
+    "created_utc":  "2026-10-18T03:47:10.1344625Z",
+    "scope":  "Read-only file hashes, sizes and embedded Windows version resources; all root files, param and SeamlessCoop except crashdumps. Other asset folders excluded.",
+    "installation_labels":  "User-provided labels; paths and equality do not verify provenance or authenticity.",
+    "sources":  {
+                    "steam":  "E:\\SteamLibrary\\steamapps\\common\\DARK SOULS REMASTERED",
+                    "alternate":  "E:\\DARK SOULS REMASTERED\\DARK SOULS REMASTERED"
+                },
+    "files":  [
+                  {
+                      "relative_path":  "binkw64.dll",
+                      "status":  "same_sha256",
+                      "steam":  {
+                                    "bytes":  259072,
+                                    "sha256":  "dd76c2d48969a77bf98e51568eda0b774e3e47296585ada5d0d0c9583ed5feb5",
+                                    "version_resource":  {
+                                                             "file":  "1.200f",
+                                                             "product":  "1.200f",
+                                                             "original_filename":  ""
+                                                         }
+                                },
+                      "alternate":  {
+                                        "bytes":  259072,
+                                        "sha256":  "dd76c2d48969a77bf98e51568eda0b774e3e47296585ada5d0d0c9583ed5feb5",
+                                        "version_resource":  {
+                                                                 "file":  "1.200f",
+                                                                 "product":  "1.200f",
+                                                                 "original_filename":  ""
+                                                             }
+                                    }
+                  },
+                  {
+                      "relative_path":  "DarkSoulsRemastered.exe",
+                      "status":  "same_sha256",
+                      "steam":  {
+                                    "bytes":  50286344,
+                                    "sha256":  "a45aaa36dd2f6cc151670a639ea5547043cf38ea79ff4178b963c6ed71f98d7b",
+                                    "version_resource":  {
+                                                             "file":  "1,0,0,0",
+                                                             "product":  "1",
+                                                             "original_filename":  "DSR.exe"
+                                                         }
+                                },
+                      "alternate":  {
+                                        "bytes":  50286344,
+                                        "sha256":  "a45aaa36dd2f6cc151670a639ea5547043cf38ea79ff4178b963c6ed71f98d7b",
+                                        "version_resource":  {
+                                                                 "file":  "1,0,0,0",
+                                                                 "product":  "1",
+                                                                 "original_filename":  "DSR.exe"
+                                                             }
+                                    }
+                  },
+                  {
+                      "relative_path":  "dlllist.txt",
+                      "status":  "alternate_only",
+                      "steam":  null,
+                      "alternate":  {
+                                        "bytes":  15,
+                                        "sha256":  "fc0befb4aae4b7f0eeb1c398fccea03cc795590e09db6628974520091fcfc516",
+                                        "version_resource":  null
+                                    }
+                  },
+                  {
+                      "relative_path":  "ds1sc_launcher.exe",
+                      "status":  "different_sha256",
+                      "steam":  {
+                                    "bytes":  178688,
+                                    "sha256":  "448a819b43a3ddf85761f3d3348696e8457eb48dbcc2a7c467d571dba64b8f74",
+                                    "version_resource":  {
+                                                             "file":  null,
+                                                             "product":  null,
+                                                             "original_filename":  null
+                                                         }
+                                },
+                      "alternate":  {
+                                        "bytes":  178688,
+                                        "sha256":  "72ed640dc4407796cdab8a9fefd3d731818b7321caac96b1dc74e09618199c89",
+                                        "version_resource":  {
+                                                                 "file":  null,
+                                                                 "product":  null,
+                                                                 "original_filename":  null
+                                                             }
+                                    }
+                  },
+                  {
+                      "relative_path":  "fmod_event_net64.dll",
+                      "status":  "same_sha256",
+                      "steam":  {
+                                    "bytes":  1020928,
+                                    "sha256":  "a82cbf50eedd842ec8b2ea5098a33c134e43bc25fe34f1c8009684d66a9a7dd7",
+                                    "version_resource":  {
+                                                             "file":  "4.44.61",
+                                                             "product":  "4.44.61",
+                                                             "original_filename":  "fmod_event_net64.dll"
+                                                         }
+                                },
+                      "alternate":  {
+                                        "bytes":  1020928,
+                                        "sha256":  "a82cbf50eedd842ec8b2ea5098a33c134e43bc25fe34f1c8009684d66a9a7dd7",
+                                        "version_resource":  {
+                                                                 "file":  "4.44.61",
+                                                                 "product":  "4.44.61",
+                                                                 "original_filename":  "fmod_event_net64.dll"
+                                                             }
+                                    }
+                  },
+                  {
+                      "relative_path":  "fmod_event64.dll",
+                      "status":  "same_sha256",
+                      "steam":  {
+                                    "bytes":  512000,
+                                    "sha256":  "27008d07df0ccfa5ad66ca6820e34fe378388515fecb0c22c48daeb26379c314",
+                                    "version_resource":  {
+                                                             "file":  "4.44.61",
+                                                             "product":  "4.44.61",
+                                                             "original_filename":  "fmod_event64.dll"
+                                                         }
+                                },
+                      "alternate":  {
+                                        "bytes":  512000,
+                                        "sha256":  "27008d07df0ccfa5ad66ca6820e34fe378388515fecb0c22c48daeb26379c314",
+                                        "version_resource":  {
+                                                                 "file":  "4.44.61",
+                                                                 "product":  "4.44.61",
+                                                                 "original_filename":  "fmod_event64.dll"
+                                                             }
+                                    }
+                  },
+                  {
+                      "relative_path":  "fmodex64.dll",
+                      "status":  "same_sha256",
+                      "steam":  {
+                                    "bytes":  1559040,
+                                    "sha256":  "3cfda68e1488c1ba7171b218da27f2feded47b958352a9240a5ce78831794468",
+                                    "version_resource":  {
+                                                             "file":  "4.44.61",
+                                                             "product":  "4.44.61",
+                                                             "original_filename":  "fmodex64.dll"
+                                                         }
+                                },
+                      "alternate":  {
+                                        "bytes":  1559040,
+                                        "sha256":  "3cfda68e1488c1ba7171b218da27f2feded47b958352a9240a5ce78831794468",
+                                        "version_resource":  {
+                                                                 "file":  "4.44.61",
+                                                                 "product":  "4.44.61",
+                                                                 "original_filename":  "fmodex64.dll"
+                                                             }
+                                    }
+                  },
+                  {
+                      "relative_path":  "OnlineFix.ini",
+                      "status":  "alternate_only",
+                      "steam":  null,
+                      "alternate":  {
+                                        "bytes":  581,
+                                        "sha256":  "012ecdf2a8f011f84d2125d60a2ddb13529a0eec3f716baf9cfce84adedc5ad0",
+                                        "version_resource":  null
+                                    }
+                  },
+                  {
+                      "relative_path":  "OnlineFix.url",
+                      "status":  "alternate_only",
+                      "steam":  null,
+                      "alternate":  {
+                                        "bytes":  46,
+                                        "sha256":  "3cb526cccccc54af4c006fff00d1f48f830d08cdd4a2f21213856065666ef38e",
+                                        "version_resource":  null
+                                    }
+                  },
+                  {
+                      "relative_path":  "OnlineFix64.dll",
+                      "status":  "alternate_only",
+                      "steam":  null,
+                      "alternate":  {
+                                        "bytes":  13003264,
+                                        "sha256":  "288dbdeee9cd144b60615b9e8cb705aa81e2778d319fcc65ded2da63e9a7f187",
+                                        "version_resource":  {
+                                                                 "file":  "1.3.3.0",
+                                                                 "product":  "1.3.3.0",
+                                                                 "original_filename":  ""
+                                                             }
+                                    }
+                  },
+                  {
+                      "relative_path":  "param/DrawParam/a10_DrawParam.parambnd.dcx",
+                      "status":  "same_sha256",
+                      "steam":  {
+                                    "bytes":  10202,
+                                    "sha256":  "dba6988a1358f95a160c725ad4c6bd17cdcb4fa7460b0e18459195a9a03ed8c3",
+                                    "version_resource":  null
+                                },
+                      "alternate":  {
+                                        "bytes":  10202,
+                                        "sha256":  "dba6988a1358f95a160c725ad4c6bd17cdcb4fa7460b0e18459195a9a03ed8c3",
+                                        "version_resource":  null
+                                    }
+                  },
+                  {
+                      "relative_path":  "param/DrawParam/a11_DrawParam.parambnd.dcx",
+                      "status":  "same_sha256",
+                      "steam":  {
+                                    "bytes":  7335,
+                                    "sha256":  "b6442d5e9415eb1327a95f34af3947d8849cbc6feb73a1f68cffdd456571eb14",
+                                    "version_resource":  null
+                                },
+                      "alternate":  {
+                                        "bytes":  7335,
+                                        "sha256":  "b6442d5e9415eb1327a95f34af3947d8849cbc6feb73a1f68cffdd456571eb14",
+                                        "version_resource":  null
+                                    }
+                  },
+                  {
+                      "relative_path":  "param/DrawParam/a12_DrawParam.parambnd.dcx",
+                      "status":  "same_sha256",
+                      "steam":  {
+                                    "bytes":  9021,
+                                    "sha256":  "1de3b7304cc2a87a8149089bc3dd887303cf4897d68cd350e0a10118c9c60068",
+                                    "version_resource":  null
+                                },
+                      "alternate":  {
+                                        "bytes":  9021,
+                                        "sha256":  "1de3b7304cc2a87a8149089bc3dd887303cf4897d68cd350e0a10118c9c60068",
+                                        "version_resource":  null
+                                    }
+                  },
+                  {
+                      "relative_path":  "param/DrawParam/a13_DrawParam.parambnd.dcx",
+                      "status":  "same_sha256",
+                      "steam":  {
+                                    "bytes":  10837,
+                                    "sha256":  "6667e863f824ea3214d75c989750f6fa5b8b9e42683366b42672d906ad02783b",
+                                    "version_resource":  null
+                                },
+                      "alternate":  {
+                                        "bytes":  10837,
+                                        "sha256":  "6667e863f824ea3214d75c989750f6fa5b8b9e42683366b42672d906ad02783b",
+                                        "version_resource":  null
+                                    }
+                  },
+                  {
+                      "relative_path":  "param/DrawParam/a14_DrawParam.parambnd.dcx",
+                      "status":  "same_sha256",
+                      "steam":  {
+                                    "bytes":  10125,
+                                    "sha256":  "bcede19f1c4b9d054cee8732b49687f96f91c3abb8f1d92d64f93808363859b4",
+                                    "version_resource":  null
+                                },
+                      "alternate":  {
+                                        "bytes":  10125,
+                                        "sha256":  "bcede19f1c4b9d054cee8732b49687f96f91c3abb8f1d92d64f93808363859b4",
+                                        "version_resource":  null
+                                    }
+                  },
+                  {
+                      "relative_path":  "param/DrawParam/a15_DrawParam.parambnd.dcx",
+                      "status":  "same_sha256",
+                      "steam":  {
+                                    "bytes":  16750,
+                                    "sha256":  "1f2883ef83ebdbfc7ad1846c24765329dbd4679bc9803e905b74e1264a3b472d",
+                                    "version_resource":  null
+                                },
+                      "alternate":  {
+                                        "bytes":  16750,
+                                        "sha256":  "1f2883ef83ebdbfc7ad1846c24765329dbd4679bc9803e905b74e1264a3b472d",
+                                        "version_resource":  null
+                                    }
+                  },
+                  {
+                      "relative_path":  "param/DrawParam/a16_DrawParam.parambnd.dcx",
+                      "status":  "same_sha256",
+                      "steam":  {
+                                    "bytes":  7223,
+                                    "sha256":  "3cc4a7212c1d1a58ea008ad79b71381bc28eb8f8ad07e06d2936e3a193248418",
+                                    "version_resource":  null
+                                },
+                      "alternate":  {
+                                        "bytes":  7223,
+                                        "sha256":  "3cc4a7212c1d1a58ea008ad79b71381bc28eb8f8ad07e06d2936e3a193248418",
+                                        "version_resource":  null
+                                    }
+                  },
+                  {
+                      "relative_path":  "param/DrawParam/a17_DrawParam.parambnd.dcx",
+                      "status":  "same_sha256",
+                      "steam":  {
+                                    "bytes":  8530,
+                                    "sha256":  "a0b35e2e21e626ffadfd5eef2b5cea80e17458e1e220ca3effea527775e81a5e",
+                                    "version_resource":  null
+                                },
+                      "alternate":  {
+                                        "bytes":  8530,
+                                        "sha256":  "a0b35e2e21e626ffadfd5eef2b5cea80e17458e1e220ca3effea527775e81a5e",
+                                        "version_resource":  null
+                                    }
+                  },
+                  {
+                      "relative_path":  "param/DrawParam/a18_DrawParam.parambnd.dcx",
+                      "status":  "same_sha256",
+                      "steam":  {
+                                    "bytes":  10503,
+                                    "sha256":  "ebb00a5f1c0d89340f1feb74486ae9502b4d1d48addf0837f1429612f19cd5d7",
+                                    "version_resource":  null
+                                },
+                      "alternate":  {
+                                        "bytes":  10503,
+                                        "sha256":  "ebb00a5f1c0d89340f1feb74486ae9502b4d1d48addf0837f1429612f19cd5d7",
+                                        "version_resource":  null
+                                    }
+                  },
+                  {
+                      "relative_path":  "param/DrawParam/a99_DrawParam.parambnd.dcx",
+                      "status":  "same_sha256",
+                      "steam":  {
+                                    "bytes":  6459,
+                                    "sha256":  "52554c7d81819bc5249dc2dc1af99fbb47e4a03f7270451d080865dd145c2f63",
+                                    "version_resource":  null
+                                },
+                      "alternate":  {
+                                        "bytes":  6459,
+                                        "sha256":  "52554c7d81819bc5249dc2dc1af99fbb47e4a03f7270451d080865dd145c2f63",
+                                        "version_resource":  null
+                                    }
+                  },
+                  {
+                      "relative_path":  "param/DrawParam/default_DrawParam.parambnd.dcx",
+                      "status":  "same_sha256",
+                      "steam":  {
+                                    "bytes":  3534,
+                                    "sha256":  "9a4376ec7b753342ce8bd6a9886a59b6602c39909001314021137573bdb5734c",
+                                    "version_resource":  null
+                                },
+                      "alternate":  {
+                                        "bytes":  3534,
+                                        "sha256":  "9a4376ec7b753342ce8bd6a9886a59b6602c39909001314021137573bdb5734c",
+                                        "version_resource":  null
+                                    }
+                  },
+                  {
+                      "relative_path":  "param/GameParam/GameParam.parambnd.dcx",
+                      "status":  "same_sha256",
+                      "steam":  {
+                                    "bytes":  498505,
+                                    "sha256":  "cc4a81cc87f028534d965c908a8aa7dba2f9e235ac30f5e72ddf6bb45dc7b5ab",
+                                    "version_resource":  null
+                                },
+                      "alternate":  {
+                                        "bytes":  498505,
+                                        "sha256":  "cc4a81cc87f028534d965c908a8aa7dba2f9e235ac30f5e72ddf6bb45dc7b5ab",
+                                        "version_resource":  null
+                                    }
+                  },
+                  {
+                      "relative_path":  "SeamlessCoop/crashpad/crashpad_handler.exe",
+                      "status":  "same_sha256",
+                      "steam":  {
+                                    "bytes":  824832,
+                                    "sha256":  "d799b428ecc200a47b08b27f6b33ed5fe1f1e065136f380f6a6e78088c404649",
+                                    "version_resource":  {
+                                                             "file":  null,
+                                                             "product":  null,
+                                                             "original_filename":  null
+                                                         }
+                                },
+                      "alternate":  {
+                                        "bytes":  824832,
+                                        "sha256":  "d799b428ecc200a47b08b27f6b33ed5fe1f1e065136f380f6a6e78088c404649",
+                                        "version_resource":  {
+                                                                 "file":  null,
+                                                                 "product":  null,
+                                                                 "original_filename":  null
+                                                             }
+                                    }
+                  },
+                  {
+                      "relative_path":  "SeamlessCoop/ds1sc.dll",
+                      "status":  "different_sha256",
+                      "steam":  {
+                                    "bytes":  2425344,
+                                    "sha256":  "5a375a5653da1186daffe339d5c5ec3df07b62c6ef7396de65edfe0944a54f70",
+                                    "version_resource":  {
+                                                             "file":  null,
+                                                             "product":  null,
+                                                             "original_filename":  null
+                                                         }
+                                },
+                      "alternate":  {
+                                        "bytes":  2426368,
+                                        "sha256":  "dd71ea19ebc6abf8667fafabdb3929a35f515cafb2df22ca35ea6552c3f88bb5",
+                                        "version_resource":  {
+                                                                 "file":  null,
+                                                                 "product":  null,
+                                                                 "original_filename":  null
+                                                             }
+                                    }
+                  },
+                  {
+                      "relative_path":  "SeamlessCoop/ds1sc_settings.ini",
+                      "status":  "different_sha256",
+                      "steam":  {
+                                    "bytes":  1789,
+                                    "sha256":  "97f565179c3a5717c4bb1ec3b05962c676a5d08aadcbd1e4eb173da1be00411b",
+                                    "version_resource":  null
+                                },
+                      "alternate":  {
+                                        "bytes":  1789,
+                                        "sha256":  "053fa683d325bf7ddc9a14623efbf60745cc533179a5734472d876e38dc2c4f5",
+                                        "version_resource":  null
+                                    }
+                  },
+                  {
+                      "relative_path":  "SeamlessCoop/locale/english.json",
+                      "status":  "different_sha256",
+                      "steam":  {
+                                    "bytes":  3488,
+                                    "sha256":  "1dcca7891e888e77a6c6c3fb5b5508bbd6460816ab3f2249104773ec3cdace8d",
+                                    "version_resource":  null
+                                },
+                      "alternate":  {
+                                        "bytes":  3303,
+                                        "sha256":  "c5500540ca8ee4dcf5b1c79a4284c655256872c91ad9a85fe68fb13576a8dcaf",
+                                        "version_resource":  null
+                                    }
+                  },
+                  {
+                      "relative_path":  "steam_api64.dll",
+                      "status":  "same_sha256",
+                      "steam":  {
+                                    "bytes":  245536,
+                                    "sha256":  "a0a5ac6dcd3d9255bb9c71bae3a71b6bf90c56f4fce46ff0d65533d7ef89b8d8",
+                                    "version_resource":  {
+                                                             "file":  "03.92.72.58",
+                                                             "product":  "01.00.00.01",
+                                                             "original_filename":  "steam_api.dll"
+                                                         }
+                                },
+                      "alternate":  {
+                                        "bytes":  245536,
+                                        "sha256":  "a0a5ac6dcd3d9255bb9c71bae3a71b6bf90c56f4fce46ff0d65533d7ef89b8d8",
+                                        "version_resource":  {
+                                                                 "file":  "03.92.72.58",
+                                                                 "product":  "01.00.00.01",
+                                                                 "original_filename":  "steam_api.dll"
+                                                             }
+                                    }
+                  },
+                  {
+                      "relative_path":  "winmm.dll",
+                      "status":  "alternate_only",
+                      "steam":  null,
+                      "alternate":  {
+                                        "bytes":  524288,
+                                        "sha256":  "ba37009eef6c041bc6d0a271c13679fb9e14a005bd7e038cee596cd4064cf8b3",
+                                        "version_resource":  {
+                                                                 "file":  "1.0.1.0",
+                                                                 "product":  "1.0.1.0",
+                                                                 "original_filename":  ""
+                                                             }
+                                    }
+                  },
+                  {
+                      "relative_path":  "xinput1_3.dll",
+                      "status":  "same_sha256",
+                      "steam":  {
+                                    "bytes":  107368,
+                                    "sha256":  "756cad002e1553cfa1a91ebe8c1b9380ffabe0b4b1916c4a4db802396ddfbef8",
+                                    "version_resource":  {
+                                                             "file":  "9.18.944.0000",
+                                                             "product":  "9.18.944.0000",
+                                                             "original_filename":  "XInput1_3.dll"
+                                                         }
+                                },
+                      "alternate":  {
+                                        "bytes":  107368,
+                                        "sha256":  "756cad002e1553cfa1a91ebe8c1b9380ffabe0b4b1916c4a4db802396ddfbef8",
+                                        "version_resource":  {
+                                                                 "file":  "9.18.944.0000",
+                                                                 "product":  "9.18.944.0000",
+                                                                 "original_filename":  "XInput1_3.dll"
+                                                             }
+                                    }
+                  }
+              ]
+}

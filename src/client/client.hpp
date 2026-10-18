@@ -7,7 +7,7 @@ namespace dsr
 struct Options;
 
 // Runs the terminal client; returns a process exit status.
-int join(const Options &o, const std::string &secret);
+int join(const Options &options, const std::string &room_password);
 } // namespace dsr
 
 

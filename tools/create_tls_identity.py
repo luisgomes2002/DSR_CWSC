@@ -22,7 +22,7 @@ def find_openssl():
     ):
         if candidate.is_file():
             return str(candidate)
-    raise RuntimeError("OpenSSL CLI nao encontrado; informe --openssl CAMINHO")
+    raise RuntimeError("OpenSSL CLI not found; provide --openssl PATH")
 
 
 def create_identity(output, openssl):
@@ -47,7 +47,7 @@ def create_identity(output, openssl):
         result = subprocess.run(command, capture_output=True, text=True, timeout=60)
         if result.returncode:
             # Avoid leaking environment secrets or arbitrary tool diagnostics.
-            raise RuntimeError("OpenSSL falhou; a pasta parcial foi preservada. Escolha outra pasta ao tentar novamente.")
+            raise RuntimeError("OpenSSL failed; the partial directory was preserved. Choose another directory before trying again.")
     der = ssl.PEM_cert_to_DER_cert(cert.read_text(encoding="ascii"))
     return pfx, cert, hashlib.sha256(der).hexdigest()
 
@@ -62,6 +62,6 @@ if __name__ == "__main__":
         print("PFX:", pfx)
         print("Certificado publico:", cert)
         print("TLS_PIN:", pin)
-        print("Guarde PFX e chave privada no host; compartilhe somente o pin por canal confiavel.")
+        print("Keep the PFX and private key on the host; share only the pin through a trusted channel.")
     except (OSError, RuntimeError, subprocess.TimeoutExpired) as error:
         parser.exit(1, str(error) + "\n")

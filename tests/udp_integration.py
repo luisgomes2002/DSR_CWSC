@@ -39,7 +39,7 @@ class NativePeer:
                 line = self.lines.get(timeout=0.2)
             except queue.Empty:
                 if self.process.poll() is not None:
-                    raise AssertionError(f"Cliente saiu: {self.history!r}; {self.process.stderr.read()}")
+                    raise AssertionError(f"Client exited: {self.history!r}; {self.process.stderr.read()}")
                 continue
             self.history.append(line)
             if line == prefix or line.startswith(prefix + "\t"):
@@ -152,7 +152,7 @@ class UdpTests(unittest.TestCase):
         for args in (["host", "--udp", "--port", "0"], ["join", "--udp"]):
             result = subprocess.run([support.EXE] + args, env=self.env, capture_output=True, text=True, timeout=5)
             self.assertNotEqual(result.returncode, 0)
-            self.assertIn("exige TCP/TLS", result.stderr)
+            self.assertIn("requires TCP/TLS", result.stderr)
             self.assertNotIn("SERVER_READY", result.stdout)
 
     def test_05_duplicate_negotiation_and_tcp_move_refused(self):

@@ -21,7 +21,7 @@ std::string room_id()
 {
     std::array<unsigned char, 16> bytes{};
     if (BCryptGenRandom(nullptr, bytes.data(), static_cast<ULONG>(bytes.size()), BCRYPT_USE_SYSTEM_PREFERRED_RNG) != 0)
-        throw std::runtime_error("Geracao do ID da sala falhou");
+        throw std::runtime_error("Room ID generation failed");
     std::string result;
     for (auto b : bytes)
     {
@@ -34,7 +34,9 @@ std::string room_id()
 
 void Host::emit(Peer &p, const std::string &line)
 {
-    if (!queue(p.output, line))
+    const bool accepted = queue(p.output, line);
+    if (p.movement) p.movement->metrics.control_queue(p.output.size(), !accepted);
+    if (!accepted)
         p.dead = true;
 }
 
@@ -275,6 +277,7 @@ Host::~Host()
 void Host::run(const Options &o)
 {
     udp_enabled = o.udp;
+    metrics_enabled = o.metrics;
     udp_library = o.tls_library;
     const auto tls = o.tls_pfx.empty() ? nullptr : TlsCredentials::server(o.tls_pfx, o.tls_library);
     Socket listener(socket(AF_INET, SOCK_STREAM, IPPROTO_TCP));
@@ -321,6 +324,7 @@ void Host::run(const Options &o)
                 try { if (!(p.tls ? p.tls->send(s, p.output) : flush(s, p.output))) p.dead = true; }
                 catch (const std::exception &) { p.dead = true; }
             }
+            if (p.movement) p.movement->metrics.control_queue(p.output.size());
             service_movement(p);
             const auto now = Clock::now();
             if (!p.id && !p.closing && now - p.accepted > std::chrono::seconds(5))

@@ -1,0 +1,2 @@
+{"elapsed_s": 0.0006437999982153997, "status": "starting", "schema": 1, "created_utc": "2026-10-18T04:25:18.821729+00:00", "expected_sha256": "a45aaa36dd2f6cc151670a639ea5547043cf38ea79ff4178b963c6ed71f98d7b", "requested_pid": 17380, "requested_executable": "E:\\DARK SOULS REMASTERED\\DARK SOULS REMASTERED\\DarkSoulsRemastered.exe", "seconds": 8.0, "hz": 10, "semantics": "Unvalidated player-data candidates; axes and units pending"}
+{"elapsed_s": 0.09439269999711541, "status": "error", "reason": "Module snapshot failed: [WinError 5] Access is denied.", "counts": {}}

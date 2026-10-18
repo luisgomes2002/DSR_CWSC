@@ -46,7 +46,7 @@ std::vector<std::string> ConsoleInput::poll()
         else
         {
             if (pending.size() >= MaxFrame)
-                throw std::runtime_error("Entrada local excede limite");
+                throw std::runtime_error("Local input exceeds the limit");
             pending += c;
             if (console)
                 std::cout << c << std::flush;
@@ -81,7 +81,7 @@ std::vector<std::string> ConsoleInput::poll()
             if (GetLastError() == ERROR_BROKEN_PIPE)
                 ended = true;
             else
-                throw std::runtime_error("Nao foi possivel consultar stdin");
+                throw std::runtime_error("Could not query standard input");
         }
         else if (type == FILE_TYPE_DISK || (type == FILE_TYPE_PIPE && available))
         {

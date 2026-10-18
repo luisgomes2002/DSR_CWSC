@@ -33,16 +33,16 @@ std::vector<std::string> split(const std::string &s)
 unsigned number(std::string_view value, unsigned low, unsigned high)
 {
     if (value.empty() || value.size() > 10)
-        throw std::runtime_error("Numero invalido");
+        throw std::runtime_error("Invalid number");
     std::uint64_t n = 0;
     for (char c : value)
     {
         if (c < '0' || c > '9')
-            throw std::runtime_error("Numero invalido");
+            throw std::runtime_error("Invalid number");
         n = n * 10 + static_cast<unsigned>(c - '0');
     }
     if (n < low || n > high)
-        throw std::runtime_error("Numero fora do limite");
+        throw std::runtime_error("Number is out of range");
     return static_cast<unsigned>(n);
 }
 

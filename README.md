@@ -10,6 +10,13 @@ The host runs on a player's PC. Guests connect to that host; guests do not
 establish direct connections to each other. No rented game server or Steam
 networking service is used by the current prototype.
 
+A separate experimental [read-only player reader](docs/PLAYER_READER.md) now
+probes the statically identified game-data candidates. Its thirteen tests include
+real Windows reads of a synthetic child. Initial live captures of the alternative
+installation cover rest, movement, stairs and menu/reload recovery; see the
+[next-session test checklist](docs/RETOMAR_TESTES.md). These candidate samples
+are not yet connected to the networking lab.
+
 ## Project status
 
 Implemented and tested locally:
@@ -24,9 +31,17 @@ Implemented and tested locally:
 - Session/connection identifiers, per-entity sequencing and stale-update rejection.
 - Bounded queues, rate limits, handshake timeouts and disconnect cleanup.
 - Modular source code and automated unit/integration tests.
+- Automatic synthetic trajectories and per-connection movement/RTT metrics, with
+  repeatable loopback benchmarks for 2, 4 and 8 clients.
+- Configurable longer room benchmarks with per-process working set/private-memory
+  histories, TCP/DTLS queue occupancy, update-interval histograms and failure summaries.
+- Bounded DTLS application-write retries and isolated bidirectional tests for
+  delay, burst loss, duplication, reordering, blackouts and bandwidth limits.
+- Complete native-room fault runner with eight encrypted-UDP profiles for 2, 4
+  and 8 clients, per-connection relay counters and automatic recovery checks.
 
 The configurable room capacity is 2–32 laboratory clients, with a default of 8.
-Four simultaneous UDP clients have been tested. This is **not evidence that
+Eight simultaneous synthetic UDP clients have been tested. This is **not evidence that
 Dark Souls supports that player count**, or that this transport is ready for gameplay.
 
 The `host` process is not a player. Run a separate `join` process to participate
@@ -38,7 +53,7 @@ Not implemented or validated:
 - Compatibility between different game installations.
 - LAN/Internet connectivity tests, NAT traversal, relays or host migration.
 - Automatic reconnection, persistent player identities, movement interpolation or prediction.
-- Performance metrics, sustained load testing or adaptive congestion control.
+- Sustained load testing or adaptive congestion control.
 - A security audit or any guarantee about future account-ban risk.
 
 ## Projects and technologies used
@@ -240,21 +255,25 @@ and `-`, with a length of 1–24 characters.
 
 For exact field layouts, sequencing, channel binding, rate limits and timeouts,
 see the [movement protocol](docs/MOVEMENT_PROTOCOL.md) and [UDP guide](docs/UDP_LAB.md).
-Those detailed documents are currently in Portuguese.
 
 ## Tests and validation
 
-The last verified local run passed **74 cases across 7 CTest suites**:
+The last full networking validation passed **99 cases across 9 CTest suites**.
+The separate `player_reader_unit` suite also passed **13 reader checks**, using
+synthetic memory and controlled Windows child processes. Live game data remains unvalidated.
 
 | Suite | Cases | Coverage |
 | --- | --- | --- |
 | `entities_unit` | 8 | World state, replicas, entity messages and commands |
-| `movement_unit` | 14 | Binary codec, identifiers, sequencing and UDP replica rules |
-| `dtls_unit` | 6 | Protected roundtrip, tampering, replay, loss, reordering and wrong keys |
+| `movement_unit` | 17 | Binary codec, identifiers, sequencing, UDP replica rules and metrics |
+| `dtls_unit` | 22 | Protected transport, handshake loss, bounded write retries, fatal errors and eight adverse-network profiles |
 | `loopback_integration` | 14 | Admission, chat, routing, framing, limits and disconnects |
 | `entities_integration` | 11 | Synthetic entity synchronization |
 | `tls_integration` | 12 | Native/Python TLS interoperability, certificate pinning and rejection paths |
 | `udp_integration` | 9 | Native UDP clients, mixed TCP/UDP rooms, snapshots, reconnection and failure paths |
+| `benchmark_integration` | 3 | Automatic 2/4/8-client trajectories, memory/queue/interval accounting, option validation and failed-launch diagnostics |
+| `room_fault_integration` | 3 | Complete 2/4/8-client rooms under combined faults, UDP blackouts, bandwidth exhaustion and rejection of a bypassing executable |
+| `player_reader_unit` | 13 | Candidate-reader guards, relocated/changing pointers, protected pages, actual child-process reads, module metadata and process exit |
 
 ```powershell
 ctest --test-dir build-v04 --verbose
@@ -283,7 +302,7 @@ gameplay test or validation of Steam account safety.
   per-peer ephemeral ports and fixed endpoints learned through TLS; it does not
   implement public-address discovery, hole punching or NAT rebinding.
 - Traffic quotas are fixed laboratory limits, not adaptive congestion control.
-  Application-send backpressure and complete TLS/DTLS shutdown still need work.
+  Complete TLS/DTLS shutdown and adaptive congestion control still need work.
 - Synthetic position checks do not validate game collisions, speed, combat or cheating.
 - Passwords/private keys need appropriate handling. Environment variables and
   encrypted PFX files do not protect against a compromised host or exposed terminal.
@@ -292,17 +311,24 @@ gameplay test or validation of Steam account safety.
 
 ## Roadmap and documentation
 
-Next: add automatic synthetic movement and metrics for RTT, timing variation,
-loss/reordering and traffic. Then expand adverse-network tests, validate LAN,
+Automatic synthetic movement and metrics for TCP RTT, update cadence/variation,
+sequence observations and application traffic are implemented. See the
+[metrics guide](docs/METRICS_LAB.md) for the reproducible benchmark and definitions.
+Bounded DTLS retries and expanded adverse-network tests are also implemented;
+see the [robustness guide](docs/ROBUSTNESS_LAB.md) and its recorded results.
+The benchmark defaults to five minutes per room and records memory/queue histories;
+see the metrics guide for longer runs and measurement limits.
+For faults on complete rooms, use the separate
+[room fault runner](docs/ROOM_FAULT_LAB.md). It prints phase/progress, applies
+faults only to its own encrypted loopback UDP flows and checks every entity's recovery.
+Next: establish performance budgets, validate LAN,
 evaluate interpolation and decide an Internet-connectivity strategy before
 attempting controlled game integration.
 
-The [detailed roadmap](docs/PROXIMOS_PASSOS.md) distinguishes completed work,
+The [detailed roadmap](docs/NEXT_STEPS.md) distinguishes completed work,
 pending phases and expected outcomes. Additional documentation:
 
 - [Protected UDP test guide](docs/UDP_LAB.md)
 - [Movement protocol specification](docs/MOVEMENT_PROTOCOL.md)
 - [Historical TLS milestone](docs/TLS_LAB.md)
-- [Historical entity synchronization milestone](docs/ENTITY_SYNC.md)
-
-The linked implementation guides and roadmap remain in Portuguese.
+- [Historical entity synchronization milestone](docs/ENTITY_SYNCHRONIZATION.md)

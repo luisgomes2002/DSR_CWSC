@@ -4,6 +4,7 @@
 #include "net/tls.hpp"
 #include "protocol/movement_packet.hpp"
 #include "protocol/movement_stream.hpp"
+#include "session/movement_metrics.hpp"
 
 #include <chrono>
 #include <optional>
@@ -19,6 +20,8 @@ class MovementLink
 {
 public:
     explicit MovementLink(SOCKET tcp, unsigned owner);
+    ~MovementLink() { metrics.report(true); }
+    MovementMetrics metrics;
     unsigned port() const { return socket_.port(); }
     SOCKET native() const { return socket_.native(); }
     void establish(TlsChannel &tls, bool server, const movement::Identity &session,

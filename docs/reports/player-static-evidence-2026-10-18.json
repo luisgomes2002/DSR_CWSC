@@ -1,0 +1,190 @@
+{
+  "schema": 1,
+  "scope": "Static file reads and objdump only; no target image/process execution or live-memory access",
+  "sha256": "a45aaa36dd2f6cc151670a639ea5547043cf38ea79ff4178b963c6ed71f98d7b",
+  "preferred_image_base": "0x140000000",
+  "validated_same_file_bytes_in_both_installations": true,
+  "fingerprint_guard_rejects_mismatch": true,
+  "exact_byte_checks": {
+    "0x322730": "488b0519579501483948680f94c0c3",
+    "0x37a500": "488b41280f284010488bc2660f7f02c3",
+    "0x37a630": "488b41280f2800488bc2660f7f02c3",
+    "0x321c70": "488d8100010000c3"
+  },
+  "constants": [
+    {
+      "rva": "0x1609680",
+      "float32": [
+        0.15915493667125702,
+        0.15915493667125702,
+        0.15915493667125702,
+        0.15915493667125702
+      ]
+    },
+    {
+      "rva": "0x1609230",
+      "float32": [
+        6.2831854820251465,
+        6.2831854820251465,
+        6.2831854820251465,
+        6.2831854820251465
+      ]
+    },
+    {
+      "rva": "0x132bd04",
+      "float32": [
+        1.2217304706573486
+      ]
+    },
+    {
+      "rva": "0x132bd0c",
+      "float32": [
+        -1.2217304706573486
+      ]
+    },
+    {
+      "rva": "0x1a77bb0",
+      "float32": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "rva": "0x1a77bc0",
+      "float32": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "rva": "0x1a77bd0",
+      "float32": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "start_rva": "0x27bf20",
+      "end_rva_exclusive": "0x27bf87",
+      "disassembly": "\nE:\\SteamLibrary\\steamapps\\common\\DARK SOULS REMASTERED\\DarkSoulsRemastered.exe:     file format pei-x86-64\n\n\nDisassembly of section .text:\n\n000000014027bf20 <.text+0x27af20>:\n   14027bf20:\t40 53                \trex push rbx\n   14027bf22:\t48 83 ec 30          \tsub    rsp,0x30\n   14027bf26:\t48 c7 44 24 20 fe ff \tmov    QWORD PTR [rsp+0x20],0xfffffffffffffffe\n   14027bf2d:\tff ff \n   14027bf2f:\t48 8b d9             \tmov    rbx,rcx\n   14027bf32:\t48 83 3d 16 bf 9f 01 \tcmp    QWORD PTR [rip+0x19fbf16],0x0        # 0x141c77e50\n   14027bf39:\t00 \n   14027bf3a:\t75 45                \tjne    0x14027bf81\n   14027bf3c:\t4c 8b 05 cd cf 8e 01 \tmov    r8,QWORD PTR [rip+0x18ecfcd]        # 0x141b68f10\n   14027bf43:\t4c 89 44 24 48       \tmov    QWORD PTR [rsp+0x48],r8\n   14027bf48:\tba 10 00 00 00       \tmov    edx,0x10\n   14027bf4d:\tb9 30 1f 00 00       \tmov    ecx,0x1f30\n   14027bf52:\te8 b9 7e a4 00       \tcall   0x140cc3e10\n   14027bf57:\t48 89 44 24 50       \tmov    QWORD PTR [rsp+0x50],rax\n   14027bf5c:\t48 85 c0             \ttest   rax,rax\n   14027bf5f:\t74 0c                \tje     0x14027bf6d\n   14027bf61:\t48 8b d3             \tmov    rdx,rbx\n   14027bf64:\t48 8b c8             \tmov    rcx,rax\n   14027bf67:\te8 64 19 0f 00       \tcall   0x14036d8d0\n   14027bf6c:\t90                   \tnop\n   14027bf6d:\t48 89 05 dc be 9f 01 \tmov    QWORD PTR [rip+0x19fbedc],rax        # 0x141c77e50\n   14027bf74:\t48 8b c8             \tmov    rcx,rax\n   14027bf77:\t48 83 c4 30          \tadd    rsp,0x30\n   14027bf7b:\t5b                   \tpop    rbx\n   14027bf7c:\te9 7f 1e 0f 00       \tjmp    0x14036de00\n   14027bf81:\t48 83 c4 30          \tadd    rsp,0x30\n   14027bf85:\t5b                   \tpop    rbx\n   14027bf86:\tc3                   \tret\n"
+    },
+    {
+      "start_rva": "0x36d8ec",
+      "end_rva_exclusive": "0x36d906",
+      "disassembly": "\nE:\\SteamLibrary\\steamapps\\common\\DARK SOULS REMASTERED\\DarkSoulsRemastered.exe:     file format pei-x86-64\n\n\nDisassembly of section .text:\n\n000000014036d8ec <.text+0x36c8ec>:\n   14036d8ec:\t48 8b ea             \tmov    rbp,rdx\n   14036d8ef:\t48 8b f9             \tmov    rdi,rcx\n   14036d8f2:\t48 8d 05 17 a9 fb 00 \tlea    rax,[rip+0xfba917]        # 0x141328210\n   14036d8f9:\t48 89 01             \tmov    QWORD PTR [rcx],rax\n   14036d8fc:\t48 89 51 10          \tmov    QWORD PTR [rcx+0x10],rdx\n   14036d900:\t8b 42 08             \tmov    eax,DWORD PTR [rdx+0x8]\n   14036d903:\t89 41 18             \tmov    DWORD PTR [rcx+0x18],eax\n"
+    },
+    {
+      "start_rva": "0x322730",
+      "end_rva_exclusive": "0x32273f",
+      "disassembly": "\nE:\\SteamLibrary\\steamapps\\common\\DARK SOULS REMASTERED\\DarkSoulsRemastered.exe:     file format pei-x86-64\n\n\nDisassembly of section .text:\n\n0000000140322730 <.text+0x321730>:\n   140322730:\t48 8b 05 19 57 95 01 \tmov    rax,QWORD PTR [rip+0x1955719]        # 0x141c77e50\n   140322737:\t48 39 48 68          \tcmp    QWORD PTR [rax+0x68],rcx\n   14032273b:\t0f 94 c0             \tsete   al\n   14032273e:\tc3                   \tret\n"
+    },
+    {
+      "start_rva": "0x5b62a0",
+      "end_rva_exclusive": "0x5b62be",
+      "disassembly": "\nE:\\SteamLibrary\\steamapps\\common\\DARK SOULS REMASTERED\\DarkSoulsRemastered.exe:     file format pei-x86-64\n\n\nDisassembly of section .text:\n\n00000001405b62a0 <.text+0x5b52a0>:\n   1405b62a0:\t48 83 ec 28          \tsub    rsp,0x28\n   1405b62a4:\t48 8b 49 08          \tmov    rcx,QWORD PTR [rcx+0x8]\n   1405b62a8:\te8 43 10 01 00       \tcall   0x1405c72f0\n   1405b62ad:\t48 8b c8             \tmov    rcx,rax\n   1405b62b0:\t48 8b 10             \tmov    rdx,QWORD PTR [rax]\n   1405b62b3:\t48 83 c4 28          \tadd    rsp,0x28\n   1405b62b7:\t48 ff a2 50 01 00 00 \trex.W jmp QWORD PTR [rdx+0x150]\n"
+    },
+    {
+      "start_rva": "0x2bd1d",
+      "end_rva_exclusive": "0x2bd4d",
+      "disassembly": "\nE:\\SteamLibrary\\steamapps\\common\\DARK SOULS REMASTERED\\DarkSoulsRemastered.exe:     file format pei-x86-64\n\n\nDisassembly of section .text:\n\n000000014002bd1d <.text+0x2ad1d>:\n   14002bd1d:\t48 8b 05 3c 5b c5 01 \tmov    rax,QWORD PTR [rip+0x1c55b3c]        # 0x141c81860\n   14002bd24:\t48 85 c0             \ttest   rax,rax\n   14002bd27:\t75 05                \tjne    0x14002bd2e\n   14002bd29:\te8 92 37 59 00       \tcall   0x1405bf4c0\n   14002bd2e:\t4c 8b 10             \tmov    r10,QWORD PTR [rax]\n   14002bd31:\t4c 8d 0d 28 ff 35 01 \tlea    r9,[rip+0x135ff28]        # 0x14138bc60\n   14002bd38:\t4c 8d 05 41 ff 35 01 \tlea    r8,[rip+0x135ff41]        # 0x14138bc80\n   14002bd3f:\t48 8d 15 7a 57 a0 01 \tlea    rdx,[rip+0x1a0577a]        # 0x141a314c0\n   14002bd46:\t48 8b c8             \tmov    rcx,rax\n   14002bd49:\t41 ff 52 58          \tcall   QWORD PTR [r10+0x58]\n"
+    },
+    {
+      "start_rva": "0x321b70",
+      "end_rva_exclusive": "0x321b8b",
+      "disassembly": "\nE:\\SteamLibrary\\steamapps\\common\\DARK SOULS REMASTERED\\DarkSoulsRemastered.exe:     file format pei-x86-64\n\n\nDisassembly of section .text:\n\n0000000140321b70 <.text+0x320b70>:\n   140321b70:\t40 53                \trex push rbx\n   140321b72:\t48 83 ec 20          \tsub    rsp,0x20\n   140321b76:\t48 8b 49 68          \tmov    rcx,QWORD PTR [rcx+0x68]\n   140321b7a:\t48 8b da             \tmov    rbx,rdx\n   140321b7d:\te8 7e 89 05 00       \tcall   0x14037a500\n   140321b82:\t48 8b c3             \tmov    rax,rbx\n   140321b85:\t48 83 c4 20          \tadd    rsp,0x20\n   140321b89:\t5b                   \tpop    rbx\n   140321b8a:\tc3                   \tret\n"
+    },
+    {
+      "start_rva": "0x37a500",
+      "end_rva_exclusive": "0x37a510",
+      "disassembly": "\nE:\\SteamLibrary\\steamapps\\common\\DARK SOULS REMASTERED\\DarkSoulsRemastered.exe:     file format pei-x86-64\n\n\nDisassembly of section .text:\n\n000000014037a500 <.text+0x379500>:\n   14037a500:\t48 8b 41 28          \tmov    rax,QWORD PTR [rcx+0x28]\n   14037a504:\t0f 28 40 10          \tmovaps xmm0,XMMWORD PTR [rax+0x10]\n   14037a508:\t48 8b c2             \tmov    rax,rdx\n   14037a50b:\t66 0f 7f 02          \tmovdqa XMMWORD PTR [rdx],xmm0\n   14037a50f:\tc3                   \tret\n"
+    },
+    {
+      "start_rva": "0x37a520",
+      "end_rva_exclusive": "0x37a530",
+      "disassembly": "\nE:\\SteamLibrary\\steamapps\\common\\DARK SOULS REMASTERED\\DarkSoulsRemastered.exe:     file format pei-x86-64\n\n\nDisassembly of section .text:\n\n000000014037a520 <.text+0x379520>:\n   14037a520:\t48 8b 41 28          \tmov    rax,QWORD PTR [rcx+0x28]\n   14037a524:\t0f 28 40 20          \tmovaps xmm0,XMMWORD PTR [rax+0x20]\n   14037a528:\t48 8b c2             \tmov    rax,rdx\n   14037a52b:\t66 0f 7f 02          \tmovdqa XMMWORD PTR [rdx],xmm0\n   14037a52f:\tc3                   \tret\n"
+    },
+    {
+      "start_rva": "0x321e30",
+      "end_rva_exclusive": "0x321e4b",
+      "disassembly": "\nE:\\SteamLibrary\\steamapps\\common\\DARK SOULS REMASTERED\\DarkSoulsRemastered.exe:     file format pei-x86-64\n\n\nDisassembly of section .text:\n\n0000000140321e30 <.text+0x320e30>:\n   140321e30:\t40 53                \trex push rbx\n   140321e32:\t48 83 ec 20          \tsub    rsp,0x20\n   140321e36:\t48 8b 49 68          \tmov    rcx,QWORD PTR [rcx+0x68]\n   140321e3a:\t48 8b da             \tmov    rbx,rdx\n   140321e3d:\te8 ee 87 05 00       \tcall   0x14037a630\n   140321e42:\t48 8b c3             \tmov    rax,rbx\n   140321e45:\t48 83 c4 20          \tadd    rsp,0x20\n   140321e49:\t5b                   \tpop    rbx\n   140321e4a:\tc3                   \tret\n"
+    },
+    {
+      "start_rva": "0x37a630",
+      "end_rva_exclusive": "0x37a63f",
+      "disassembly": "\nE:\\SteamLibrary\\steamapps\\common\\DARK SOULS REMASTERED\\DarkSoulsRemastered.exe:     file format pei-x86-64\n\n\nDisassembly of section .text:\n\n000000014037a630 <.text+0x379630>:\n   14037a630:\t48 8b 41 28          \tmov    rax,QWORD PTR [rcx+0x28]\n   14037a634:\t0f 28 00             \tmovaps xmm0,XMMWORD PTR [rax]\n   14037a637:\t48 8b c2             \tmov    rax,rdx\n   14037a63a:\t66 0f 7f 02          \tmovdqa XMMWORD PTR [rdx],xmm0\n   14037a63e:\tc3                   \tret\n"
+    },
+    {
+      "start_rva": "0x37a590",
+      "end_rva_exclusive": "0x37a627",
+      "disassembly": "\nE:\\SteamLibrary\\steamapps\\common\\DARK SOULS REMASTERED\\DarkSoulsRemastered.exe:     file format pei-x86-64\n\n\nDisassembly of section .text:\n\n000000014037a590 <.text+0x379590>:\n   14037a590:\t48 83 ec 58          \tsub    rsp,0x58\n   14037a594:\t48 8b 05 85 12 73 01 \tmov    rax,QWORD PTR [rip+0x1731285]        # 0x141aab820\n   14037a59b:\t48 33 c4             \txor    rax,rsp\n   14037a59e:\t48 89 44 24 40       \tmov    QWORD PTR [rsp+0x40],rax\n   14037a5a3:\tf3 0f 10 0a          \tmovss  xmm1,DWORD PTR [rdx]\n   14037a5a7:\tf3 0f 10 05 5d 17 fb \tmovss  xmm0,DWORD PTR [rip+0xfb175d]        # 0x14132bd0c\n   14037a5ae:\t00 \n   14037a5af:\t0f 2f c1             \tcomiss xmm0,xmm1\n   14037a5b2:\tc7 44 24 24 aa 61 9c \tmov    DWORD PTR [rsp+0x24],0x3f9c61aa\n   14037a5b9:\t3f \n   14037a5ba:\tc7 44 24 20 aa 61 9c \tmov    DWORD PTR [rsp+0x20],0xbf9c61aa\n   14037a5c1:\tbf \n   14037a5c2:\tf3 0f 11 4c 24 28    \tmovss  DWORD PTR [rsp+0x28],xmm1\n   14037a5c8:\t76 07                \tjbe    0x14037a5d1\n   14037a5ca:\t48 8d 44 24 20       \tlea    rax,[rsp+0x20]\n   14037a5cf:\teb 15                \tjmp    0x14037a5e6\n   14037a5d1:\t0f 2f 0d 2c 17 fb 00 \tcomiss xmm1,DWORD PTR [rip+0xfb172c]        # 0x14132bd04\n   14037a5d8:\t48 8d 44 24 24       \tlea    rax,[rsp+0x24]\n   14037a5dd:\t4c 8d 44 24 28       \tlea    r8,[rsp+0x28]\n   14037a5e2:\t49 0f 46 c0          \tcmovbe rax,r8\n   14037a5e6:\tf3 0f 10 4a 0c       \tmovss  xmm1,DWORD PTR [rdx+0xc]\n   14037a5eb:\tf3 0f 10 42 08       \tmovss  xmm0,DWORD PTR [rdx+0x8]\n   14037a5f0:\tf3 0f 10 52 04       \tmovss  xmm2,DWORD PTR [rdx+0x4]\n   14037a5f5:\t48 8d 54 24 30       \tlea    rdx,[rsp+0x30]\n   14037a5fa:\tf3 0f 10 18          \tmovss  xmm3,DWORD PTR [rax]\n   14037a5fe:\t48 8b 49 28          \tmov    rcx,QWORD PTR [rcx+0x28]\n   14037a602:\t0f 14 d8             \tunpcklps xmm3,xmm0\n   14037a605:\t0f 14 d1             \tunpcklps xmm2,xmm1\n   14037a608:\t0f 14 da             \tunpcklps xmm3,xmm2\n   14037a60b:\t0f 29 5c 24 30       \tmovaps XMMWORD PTR [rsp+0x30],xmm3\n   14037a610:\te8 0b 17 f4 ff       \tcall   0x1402bbd20\n   14037a615:\t48 8b 4c 24 40       \tmov    rcx,QWORD PTR [rsp+0x40]\n   14037a61a:\t48 33 cc             \txor    rcx,rsp\n   14037a61d:\te8 5e 9a d6 00       \tcall   0x1410e4080\n   14037a622:\t48 83 c4 58          \tadd    rsp,0x58\n   14037a626:\tc3                   \tret\n"
+    },
+    {
+      "start_rva": "0x2bbd20",
+      "end_rva_exclusive": "0x2bbd70",
+      "disassembly": "\nE:\\SteamLibrary\\steamapps\\common\\DARK SOULS REMASTERED\\DarkSoulsRemastered.exe:     file format pei-x86-64\n\n\nDisassembly of section .text:\n\n00000001402bbd20 <.text+0x2bad20>:\n   1402bbd20:\t0f 28 22             \tmovaps xmm4,XMMWORD PTR [rdx]\n   1402bbd23:\t0f 28 1d 56 d9 34 01 \tmovaps xmm3,XMMWORD PTR [rip+0x134d956]        # 0x141609680\n   1402bbd2a:\t0f 28 0d 3f d7 34 01 \tmovaps xmm1,XMMWORD PTR [rip+0x134d73f]        # 0x141609470\n   1402bbd31:\t0f 28 15 e8 d6 34 01 \tmovaps xmm2,XMMWORD PTR [rip+0x134d6e8]        # 0x141609420\n   1402bbd38:\t0f 59 dc             \tmulps  xmm3,xmm4\n   1402bbd3b:\t0f 54 d3             \tandps  xmm2,xmm3\n   1402bbd3e:\t0f 54 cb             \tandps  xmm1,xmm3\n   1402bbd41:\t0f 56 0d d8 d8 34 01 \torps   xmm1,XMMWORD PTR [rip+0x134d8d8]        # 0x141609620\n   1402bbd48:\t0f c2 15 d0 d8 34 01 \tcmpleps xmm2,XMMWORD PTR [rip+0x134d8d0]        # 0x141609620\n   1402bbd4f:\t02 \n   1402bbd50:\t0f 28 c1             \tmovaps xmm0,xmm1\n   1402bbd53:\t0f 58 c3             \taddps  xmm0,xmm3\n   1402bbd56:\t0f 5c c1             \tsubps  xmm0,xmm1\n   1402bbd59:\t0f 54 c2             \tandps  xmm0,xmm2\n   1402bbd5c:\t0f 55 d3             \tandnps xmm2,xmm3\n   1402bbd5f:\t0f 57 c2             \txorps  xmm0,xmm2\n   1402bbd62:\t0f 59 05 c7 d4 34 01 \tmulps  xmm0,XMMWORD PTR [rip+0x134d4c7]        # 0x141609230\n   1402bbd69:\t0f 5c e0             \tsubps  xmm4,xmm0\n   1402bbd6c:\t0f 29 21             \tmovaps XMMWORD PTR [rcx],xmm4\n   1402bbd6f:\tc3                   \tret\n"
+    },
+    {
+      "start_rva": "0x37a4e0",
+      "end_rva_exclusive": "0x37a4e9",
+      "disassembly": "\nE:\\SteamLibrary\\steamapps\\common\\DARK SOULS REMASTERED\\DarkSoulsRemastered.exe:     file format pei-x86-64\n\n\nDisassembly of section .text:\n\n000000014037a4e0 <.text+0x3794e0>:\n   14037a4e0:\t48 8b 49 28          \tmov    rcx,QWORD PTR [rcx+0x28]\n   14037a4e4:\te9 07 17 f4 ff       \tjmp    0x1402bbbf0\n"
+    },
+    {
+      "start_rva": "0x2bbbf0",
+      "end_rva_exclusive": "0x2bbc11",
+      "disassembly": "\nE:\\SteamLibrary\\steamapps\\common\\DARK SOULS REMASTERED\\DarkSoulsRemastered.exe:     file format pei-x86-64\n\n\nDisassembly of section .text:\n\n00000001402bbbf0 <.text+0x2babf0>:\n   1402bbbf0:\t0f 28 02             \tmovaps xmm0,XMMWORD PTR [rdx]\n   1402bbbf3:\t66 0f 7f 81 b0 00 00 \tmovdqa XMMWORD PTR [rcx+0xb0],xmm0\n   1402bbbfa:\t00 \n   1402bbbfb:\t0f 28 0a             \tmovaps xmm1,XMMWORD PTR [rdx]\n   1402bbbfe:\t66 0f 7f 49 10       \tmovdqa XMMWORD PTR [rcx+0x10],xmm1\n   1402bbc03:\t66 c7 41 30 01 01    \tmov    WORD PTR [rcx+0x30],0x101\n   1402bbc09:\tc6 81 fa 01 00 00 01 \tmov    BYTE PTR [rcx+0x1fa],0x1\n   1402bbc10:\tc3                   \tret\n"
+    },
+    {
+      "start_rva": "0x37a540",
+      "end_rva_exclusive": "0x37a58a",
+      "disassembly": "\nE:\\SteamLibrary\\steamapps\\common\\DARK SOULS REMASTERED\\DarkSoulsRemastered.exe:     file format pei-x86-64\n\n\nDisassembly of section .text:\n\n000000014037a540 <.text+0x379540>:\n   14037a540:\t40 53                \trex push rbx\n   14037a542:\t48 83 ec 20          \tsub    rsp,0x20\n   14037a546:\t48 8b 49 10          \tmov    rcx,QWORD PTR [rcx+0x10]\n   14037a54a:\t48 8b da             \tmov    rbx,rdx\n   14037a54d:\t48 85 c9             \ttest   rcx,rcx\n   14037a550:\t74 27                \tje     0x14037a579\n   14037a552:\te8 19 77 fa ff       \tcall   0x140321c70\n   14037a557:\t0f 28 00             \tmovaps xmm0,XMMWORD PTR [rax]\n   14037a55a:\t66 0f 7f 03          \tmovdqa XMMWORD PTR [rbx],xmm0\n   14037a55e:\t0f 28 48 10          \tmovaps xmm1,XMMWORD PTR [rax+0x10]\n   14037a562:\t66 0f 7f 4b 10       \tmovdqa XMMWORD PTR [rbx+0x10],xmm1\n   14037a567:\t0f 28 40 20          \tmovaps xmm0,XMMWORD PTR [rax+0x20]\n   14037a56b:\t48 8b c3             \tmov    rax,rbx\n   14037a56e:\t66 0f 7f 43 20       \tmovdqa XMMWORD PTR [rbx+0x20],xmm0\n   14037a573:\t48 83 c4 20          \tadd    rsp,0x20\n   14037a577:\t5b                   \tpop    rbx\n   14037a578:\tc3                   \tret\n   14037a579:\t48 8b cb             \tmov    rcx,rbx\n   14037a57c:\te8 9f 9b f4 ff       \tcall   0x1402c4120\n   14037a581:\t48 8b c3             \tmov    rax,rbx\n   14037a584:\t48 83 c4 20          \tadd    rsp,0x20\n   14037a588:\t5b                   \tpop    rbx\n   14037a589:\tc3                   \tret\n"
+    },
+    {
+      "start_rva": "0x321c70",
+      "end_rva_exclusive": "0x321c78",
+      "disassembly": "\nE:\\SteamLibrary\\steamapps\\common\\DARK SOULS REMASTERED\\DarkSoulsRemastered.exe:     file format pei-x86-64\n\n\nDisassembly of section .text:\n\n0000000140321c70 <.text+0x320c70>:\n   140321c70:\t48 8d 81 00 01 00 00 \tlea    rax,[rcx+0x100]\n   140321c77:\tc3                   \tret\n"
+    },
+    {
+      "start_rva": "0x1878d",
+      "end_rva_exclusive": "0x187bd",
+      "disassembly": "\nE:\\SteamLibrary\\steamapps\\common\\DARK SOULS REMASTERED\\DarkSoulsRemastered.exe:     file format pei-x86-64\n\n\nDisassembly of section .text:\n\n000000014001878d <.text+0x1778d>:\n   14001878d:\t48 8b 05 e4 2c c6 01 \tmov    rax,QWORD PTR [rip+0x1c62ce4]        # 0x141c7b478\n   140018794:\t48 85 c0             \ttest   rax,rax\n   140018797:\t75 05                \tjne    0x14001879e\n   140018799:\te8 42 f1 4a 00       \tcall   0x1404c78e0\n   14001879e:\t4c 8b 10             \tmov    r10,QWORD PTR [rax]\n   1400187a1:\t4c 8d 0d 78 cc 33 01 \tlea    r9,[rip+0x133cc78]        # 0x141355420\n   1400187a8:\t4c 8d 05 b9 cc 33 01 \tlea    r8,[rip+0x133ccb9]        # 0x141355468\n   1400187af:\t48 8d 15 ea 5c a1 01 \tlea    rdx,[rip+0x1a15cea]        # 0x141a2e4a0\n   1400187b6:\t48 8b c8             \tmov    rcx,rax\n   1400187b9:\t41 ff 52 58          \tcall   QWORD PTR [r10+0x58]\n"
+    },
+    {
+      "start_rva": "0x4aadc0",
+      "end_rva_exclusive": "0x4aadd7",
+      "disassembly": "\nE:\\SteamLibrary\\steamapps\\common\\DARK SOULS REMASTERED\\DarkSoulsRemastered.exe:     file format pei-x86-64\n\n\nDisassembly of section .text:\n\n00000001404aadc0 <.text+0x4a9dc0>:\n   1404aadc0:\t48 8b 05 69 f7 7d 01 \tmov    rax,QWORD PTR [rip+0x17df769]        # 0x141c8a530\n   1404aadc7:\t48 8b 48 10          \tmov    rcx,QWORD PTR [rax+0x10]\n   1404aadcb:\t48 85 c9             \ttest   rcx,rcx\n   1404aadce:\t74 04                \tje     0x1404aadd4\n   1404aadd0:\t8b 41 10             \tmov    eax,DWORD PTR [rcx+0x10]\n   1404aadd3:\tc3                   \tret\n   1404aadd4:\t33 c0                \txor    eax,eax\n   1404aadd6:\tc3                   \tret\n"
+    },
+    {
+      "start_rva": "0x7578b0",
+      "end_rva_exclusive": "0x757904",
+      "disassembly": "\nE:\\SteamLibrary\\steamapps\\common\\DARK SOULS REMASTERED\\DarkSoulsRemastered.exe:     file format pei-x86-64\n\n\nDisassembly of section .text:\n\n00000001407578b0 <.text+0x7568b0>:\n   1407578b0:\t48 83 ec 38          \tsub    rsp,0x38\n   1407578b4:\t48 c7 44 24 20 fe ff \tmov    QWORD PTR [rsp+0x20],0xfffffffffffffffe\n   1407578bb:\tff ff \n   1407578bd:\t4c 8b 05 4c 16 41 01 \tmov    r8,QWORD PTR [rip+0x141164c]        # 0x141b68f10\n   1407578c4:\t4c 89 44 24 40       \tmov    QWORD PTR [rsp+0x40],r8\n   1407578c9:\tba 08 00 00 00       \tmov    edx,0x8\n   1407578ce:\tb9 f0 00 00 00       \tmov    ecx,0xf0\n   1407578d3:\te8 38 c5 56 00       \tcall   0x140cc3e10\n   1407578d8:\t48 89 44 24 48       \tmov    QWORD PTR [rsp+0x48],rax\n   1407578dd:\t48 85 c0             \ttest   rax,rax\n   1407578e0:\t74 12                \tje     0x1407578f4\n   1407578e2:\t48 8b c8             \tmov    rcx,rax\n   1407578e5:\te8 26 d2 ff ff       \tcall   0x140754b10\n   1407578ea:\t90                   \tnop\n   1407578eb:\t48 89 05 3e 2c 53 01 \tmov    QWORD PTR [rip+0x1532c3e],rax        # 0x141c8a530\n   1407578f2:\teb 0b                \tjmp    0x1407578ff\n   1407578f4:\t48 c7 05 31 2c 53 01 \tmov    QWORD PTR [rip+0x1532c31],0x0        # 0x141c8a530\n   1407578fb:\t00 00 00 00 \n   1407578ff:\t48 83 c4 38          \tadd    rsp,0x38\n   140757903:\tc3                   \tret\n"
+    },
+    {
+      "start_rva": "0x754b40",
+      "end_rva_exclusive": "0x754b5f",
+      "disassembly": "\nE:\\SteamLibrary\\steamapps\\common\\DARK SOULS REMASTERED\\DarkSoulsRemastered.exe:     file format pei-x86-64\n\n\nDisassembly of section .text:\n\n0000000140754b40 <.text+0x753b40>:\n   140754b40:\t48 8b d9             \tmov    rbx,rcx\n   140754b43:\t48 8d 05 26 74 c8 00 \tlea    rax,[rip+0xc87426]        # 0x1413dbf70\n   140754b4a:\t48 89 01             \tmov    QWORD PTR [rcx],rax\n   140754b4d:\t33 ff                \txor    edi,edi\n   140754b4f:\t48 89 79 08          \tmov    QWORD PTR [rcx+0x8],rdi\n   140754b53:\t48 89 79 10          \tmov    QWORD PTR [rcx+0x10],rdi\n   140754b57:\t48 89 79 18          \tmov    QWORD PTR [rcx+0x18],rdi\n   140754b5b:\t48 89 79 20          \tmov    QWORD PTR [rcx+0x20],rdi\n"
+    },
+    {
+      "start_rva": "0x37833c",
+      "end_rva_exclusive": "0x378354",
+      "disassembly": "\nE:\\SteamLibrary\\steamapps\\common\\DARK SOULS REMASTERED\\DarkSoulsRemastered.exe:     file format pei-x86-64\n\n\nDisassembly of section .text:\n\n000000014037833c <.text+0x37733c>:\n   14037833c:\t48 8d 8b a0 00 00 00 \tlea    rcx,[rbx+0xa0]\n   140378343:\te8 38 94 e6 ff       \tcall   0x1401e1780\n   140378348:\t48 8d 8b d0 00 00 00 \tlea    rcx,[rbx+0xd0]\n   14037834f:\te8 2c 94 e6 ff       \tcall   0x1401e1780\n"
+    },
+    {
+      "start_rva": "0x1e1780",
+      "end_rva_exclusive": "0x1e17a4",
+      "disassembly": "\nE:\\SteamLibrary\\steamapps\\common\\DARK SOULS REMASTERED\\DarkSoulsRemastered.exe:     file format pei-x86-64\n\n\nDisassembly of section .text:\n\n00000001401e1780 <.text+0x1e0780>:\n   1401e1780:\t0f 28 05 29 64 89 01 \tmovaps xmm0,XMMWORD PTR [rip+0x1896429]        # 0x141a77bb0\n   1401e1787:\t48 8b c1             \tmov    rax,rcx\n   1401e178a:\t0f 28 0d 2f 64 89 01 \tmovaps xmm1,XMMWORD PTR [rip+0x189642f]        # 0x141a77bc0\n   1401e1791:\t0f 29 01             \tmovaps XMMWORD PTR [rcx],xmm0\n   1401e1794:\t0f 28 05 35 64 89 01 \tmovaps xmm0,XMMWORD PTR [rip+0x1896435]        # 0x141a77bd0\n   1401e179b:\t0f 29 41 20          \tmovaps XMMWORD PTR [rcx+0x20],xmm0\n   1401e179f:\t0f 29 49 10          \tmovaps XMMWORD PTR [rcx+0x10],xmm1\n   1401e17a3:\tc3                   \tret\n"
+    },
+    {
+      "start_rva": "0x37a650",
+      "end_rva_exclusive": "0x37a695",
+      "disassembly": "\nE:\\SteamLibrary\\steamapps\\common\\DARK SOULS REMASTERED\\DarkSoulsRemastered.exe:     file format pei-x86-64\n\n\nDisassembly of section .text:\n\n000000014037a650 <.text+0x379650>:\n   14037a650:\tf3 0f 10 05 88 b6 29 \tmovss  xmm0,DWORD PTR [rip+0x129b688]        # 0x141615ce0\n   14037a657:\t01 \n   14037a658:\t0f 57 c9             \txorps  xmm1,xmm1\n   14037a65b:\tf3 0f 10 91 c8 00 00 \tmovss  xmm2,DWORD PTR [rcx+0xc8]\n   14037a662:\t00 \n   14037a663:\t48 8b c2             \tmov    rax,rdx\n   14037a666:\tf3 0f 10 99 b8 00 00 \tmovss  xmm3,DWORD PTR [rcx+0xb8]\n   14037a66d:\t00 \n   14037a66e:\t0f 57 d0             \txorps  xmm2,xmm0\n   14037a671:\tf3 0f 10 a1 a8 00 00 \tmovss  xmm4,DWORD PTR [rcx+0xa8]\n   14037a678:\t00 \n   14037a679:\t0f 57 d8             \txorps  xmm3,xmm0\n   14037a67c:\t0f 57 e0             \txorps  xmm4,xmm0\n   14037a67f:\t0f 28 c2             \tmovaps xmm0,xmm2\n   14037a682:\t0f 28 d3             \tmovaps xmm2,xmm3\n   14037a685:\t0f 28 dc             \tmovaps xmm3,xmm4\n   14037a688:\t0f 14 d8             \tunpcklps xmm3,xmm0\n   14037a68b:\t0f 14 d1             \tunpcklps xmm2,xmm1\n   14037a68e:\t0f 14 da             \tunpcklps xmm3,xmm2\n   14037a691:\t0f 29 1a             \tmovaps XMMWORD PTR [rdx],xmm3\n   14037a694:\tc3                   \tret\n"
+    }
+  ]
+}

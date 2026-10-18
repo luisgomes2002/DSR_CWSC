@@ -3,13 +3,20 @@
 #include "protocol/protocol.hpp"
 
 #include <iostream>
+#include <cmath>
 #include <stdexcept>
 #include <utility>
 
 namespace dsr
 {
 ClientMovement::ClientMovement(SOCKET tcp, unsigned owner, const std::string &room, std::string library)
-    : link_(tcp, owner), session_(parse_identity(room)), library_(std::move(library)) {}
+    : link_(tcp, owner), owner_(owner), session_(parse_identity(room)), library_(std::move(library)) {}
+
+void ClientMovement::automatic(double seconds)
+{
+    const double phase = seconds * 0.8 + static_cast<double>(owner_);
+    link_.propose({10 * std::cos(phase), 2 * std::sin(phase * 0.5), 10 * std::sin(phase)});
+}
 
 std::string ClientMovement::request() const
 { return "UDP_REQUEST\t1\t" + std::to_string(link_.port()); }
@@ -51,7 +58,7 @@ void ClientMovement::poll(PlayerReplica &replica)
     if (ready() && !announced_)
     { std::cout << "UDP_ACTIVE\t1" << std::endl; announced_ = true; last_state_ = now; }
     if (announced_ && now - last_state_ > std::chrono::seconds(10))
-        throw std::runtime_error("UDP: host sem estados por 10 segundos; sem fallback");
+        throw std::runtime_error("UDP: host sent no states for 10 seconds; no fallback is available");
     if (ready()) link_.publish_input();
 }
 } // namespace dsr

@@ -8,7 +8,7 @@ Winsock::Winsock()
 {
     WSADATA w{};
     if (WSAStartup(MAKEWORD(2, 2), &w))
-        throw std::runtime_error("WSAStartup falhou");
+        throw std::runtime_error("WSAStartup failed");
 }
 
 Winsock::~Winsock() { WSACleanup(); }

@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "created_utc": "2026-10-18T04:17:35.228387+00:00",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.13.7",
+  "suite": "player_reader_unit",
+  "command": "ctest --test-dir build-v04 -R player_reader_unit --output-on-failure",
+  "passed": true,
+  "cases": 13,
+  "checks": [
+    "test_changed_chain_never_publishes_previous_block",
+    "test_changing_vectors_retry_with_a_fixed_budget",
+    "test_live_anchor_changes_stop_the_reader",
+    "test_loading_does_not_republish_old_values",
+    "test_nan_and_infinity_are_rejected",
+    "test_null_invalid_unreadable_pointers",
+    "test_relocation_and_unknown_fourth_lanes",
+    "test_script_id_is_separate_optional_and_type_checked",
+    "test_wrong_types_back_reference_and_predicate",
+    "test_cli_rejects_wrong_build_and_preserves_existing_report",
+    "test_real_cross_process_reads_loading_and_recovery",
+    "test_real_module_headers_and_creation_identity",
+    "test_real_page_guards_partial_ranges_and_process_exit"
+  ],
+  "scope": "Synthetic sparse memory plus actual read-only Windows API reads of controlled Python child processes; no live game validation",
+  "game_process_launched": false,
+  "game_memory_read": false,
+  "source_sha256": {
+    "tools/player_reader.py": "07b97db894cc0375efbc1432b5f91abebd30969dbf064ab35ce5852b7930e46c",
+    "tests/player_reader_unit.py": "b0731cfc029ae7d157c663518af63b3eedc08f5b2b1a96631423effa9098064a",
+    "tests/player_reader_fixture.py": "247ba8058a5a9966d32c49fbf83de3c89cb34979290daf9fea9f45c92c65bb11"
+  }
+}

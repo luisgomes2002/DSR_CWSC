@@ -105,7 +105,7 @@ class EntityTests(unittest.TestCase):
             env=self.env, capture_output=True, text=True, timeout=8,
         )
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn("Comando invalido", result.stderr)
+        self.assertIn("Invalid command", result.stderr)
         self.assertIn("POSITION\t1\t10\t0\t5\t2", result.stdout)
         self.assertIn("PLAYER\t1\tconsole\t10\t0\t5\t2", result.stdout)
         self.assertIn("BYE", result.stdout)
@@ -135,7 +135,7 @@ class EntityTests(unittest.TestCase):
                 line = lines.get(timeout=4)
                 if line == prefix or line.startswith(prefix + "\t"):
                     return line
-            self.fail("Evento nao recebido: " + prefix)
+            self.fail("Expected event was not received: " + prefix)
 
         try:
             event("PLAYERS_END")

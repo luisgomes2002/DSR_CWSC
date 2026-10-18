@@ -1,173 +1,173 @@
-# Protocolo de movimentos — contrato v1
+# Movement protocol – contract v1
 
-## Status e limites desta entrega
+## Status and limits of this delivery
 
-O contrato v1 abaixo possui codec, validacao estrutural e controle de sequencia
-testados. Na build 0.4, foi integrado com sockets UDP e DTLS opt-in (`--udp`),
-incluindo negociacao, IDs e ciclo de vida. Veja o [guia da integracao](UDP_LAB.md).
-O framing TCP segue versao 3, com build `dsr-network-lab-0.4`.
-Ainda nao ha metricas, interpolacao ou sincronizacao com o DSR.
+The v1 contract below has codec, structural validation and sequence control
+tested. In build 0.4, it was integrated with UDP and DTLS opt-in sockets (`--udp`),
+including negotiation, IDs and life cycle. See the [integration guide](UDP_LAB.md).
+TCP framing follows version 3, with build `dsr-network-lab-0.4`.
+There are still no metrics, interpolation or synchronization with DSR.
 
-## Separacao dos canais
+## Separation of channels
 
-| Dados | Canal planejado | Regra |
+| Data | Channel planned | Rule |
 |---|---|---|
-| Senha, entrada, compatibilidade e autorizacao UDP | TCP/TLS | Concluir antes de aceitar movimentos |
-| Roster, criacao e remocao de entidades | TCP/TLS | UDP nunca cria ou ressuscita uma entidade |
-| Snapshot inicial e ressincronizacao | TCP/TLS | Aplicacao atomica; define baseline de revisao |
-| Chat, mensagens privadas, erros e encerramento | TCP/TLS | Mantem os recursos existentes |
-| Proposta de posicao do cliente | UDP protegido, tipo Input | Apenas sua propria entidade |
-| Posicao aceita pelo host | UDP protegido, tipo State | Host distribui aos clientes, inclusive ao autor |
-| Itens, dano, morte, bosses e progresso | Fora deste contrato | Exigem protocolo de eventos confiaveis e regras de autoridade proprias |
+| Password, input, compatibility and UDP authorization | TCP/TLS | Complete before accepting moves |
+| Roster, creation and removal of entities | TCP/TLS | UDP never creates or resurrects an entity |
+| Initial snapshot and resynchronization | TCP/TLS | Atomic application; defines review baseline |
+| Chat, private messages, errors and termination | TCP/TLS | Maintains existing resources |
+| Client position proposal | Protected UDP, type Input | Just your own entity |
+| Position accepted by the host | Protected UDP, type State | Host distributes to customers, including the author |
+| Items, damage, death, bosses and progress | Outside this contract | Require reliable event protocol and own authority rules |
 
-Nao enviar o mesmo fluxo continuo de movimentos simultaneamente por TCP e UDP.
-Na ativacao, negociar explicitamente o modo. Se UDP nao puder ser
-autenticado, informar a falha; nao aceitar datagramas em texto claro como fallback.
-O modo legado TCP pode continuar existindo como modo separado e explicito.
+Do not send the same continuous stream of movements simultaneously via TCP and UDP.
+Upon activation, explicitly negotiate the mode. If UDP cannot be
+authenticated, report the failure; Do not accept clear text datagrams as fallback.
+The legacy TCP mode may continue to exist as a separate and explicit mode.
 
-Topologia: cliente -> host -> clientes. Convidados nao conversam entre si.
-O host valida/aplica a proposta antes de publicar State, com sua propria revisao.
-`Input` aqui significa proposta de posicao absoluta do laboratorio, NAO comando
-de controle do DSR. Limites de coordenadas nao demonstram validacao de velocidade,
-colisao, teleporte ou combate.
+Topology: client -> host -> clients. Guests do not talk to each other.
+The host validates/applies the proposal before publishing state, with its own review.
+`Input` here means absolute laboratory position proposal, NOT command
+DSR control. Coordinate limits do not demonstrate speed validation,
+collision, teleportation or combat.
 
-## Identidade e protecao
+## Identity and protection
 
-- `session`: 128 bits nao nulos, gerados pelo host com CSPRNG por abertura de sala.
-  Pode usar os 16 bytes representados pelo ID hexadecimal atual da sala, sem
-  copiar o texto ASCII. Nova sala implica novo ID.
-- `connection`: 128 bits nao nulos, novos para cada entrada/reconexao, gerados
-  pelo host com CSPRNG e comunicados exclusivamente no controle TLS autenticado.
-  Nao e SteamID, nome, endereco IP, senha nem chave criptografica.
-- `entity`: ID de jogador uint32 atribuido pelo host, nunca zero. Nao reutilizar
-  IDs na mesma sessao; ao esgotar o espaco, encerrar a sessao, sem wrap.
-- Input usa a conexao do remetente. State usa a conexao do destinatario;
-  a entidade de State pode ser qualquer jogador ativo autorizado naquele mundo.
-- Um State deve vir do canal autenticado do host. Um Input deve vir do canal
-  autenticado do dono da entidade. IP/porta e IDs do payload nao comprovam isso.
-- A integracao usa DTLS 1.2/OpenSSL, com PSK exclusiva derivada do TLS exporter
-  e contexto session+connection. O handshake prova posse dessa chave; nunca
-  confiar apenas nos IDs enviados. O fluxo concreto esta no [guia](UDP_LAB.md).
-- A biblioteca deve tratar autenticidade, confidencialidade e protecao contra
-  replay de registros. A sequencia da aplicacao complementa, nao substitui isso.
-- Sem mudanca automatica de endpoint: revalidar por handshake autenticado.
-  Ao perder/fechar o TCP, invalidar o canal UDP, seus vinculos e filas.
+- `session`: 128 non-null bits, generated by the host with CSPRNG per room opening.
+You can use the 16 bytes represented by the room's current hexadecimal ID, without
+copy the ASCII text. New room implies new ID.
+copy the ASCII text. New room implies new ID.
+by the host with CSPRNG and communicated exclusively in authenticated TLS control.
+It is not SteamID, name, IP address, password or encryption key.
+- `entity`: host-assigned uint32 player ID, never zero. Do not reuse
+IDs in the same session; When running out of space, end the session, without wrapping.
+- Input uses the sender's connection. State uses the recipient's connection;
+the State entity can be any authorized active player in that world.
+- A State must come from the host's authenticated channel. An Input must come from the channel
+authenticated by the owner of the entity. IP/port and payload IDs do not prove this.
+- Integration uses DTLS 1.2/OpenSSL, with exclusive PSK derived from TLS exporter
+and session+connection context. The handshake proves possession of this key; never
+trust only the IDs sent. The concrete flow is in [guide](UDP_LAB.md).
+- The library must treat authenticity, confidentiality and protection against
+record replay. The application sequence complements, does not replace this.
+- No automatic change of endpoint: revalidate via authenticated handshake.
+When losing/closing TCP, the UDP channel, its links and queues will be invalidated.
 
-Os 68 bytes abaixo sao SOMENTE o payload da aplicacao, dentro do canal protegido.
-Nao incluem cabecalhos IP/UDP, handshake, tag de autenticacao ou overhead da
-biblioteca. O codec NAO cifra, autentica, gera identidades ou recebe da rede.
+The 68 bytes below are ONLY the application payload, within the protected channel.
+Does not include IP/UDP headers, handshake, authentication tag or network overhead.
+library. The codec DOES NOT encrypt, authenticate, generate identities or receive from the network.
 
-## Formato binario fixo
+## Fixed binary format
 
-Um payload tem exatamente 68 bytes e uma mensagem. Inteiros multibyte usam
-big-endian. Nao serializar structs com memcpy: padding e layout nao sao o contrato.
+A payload is exactly 68 bytes and one message. Multibyte integers use
+big-endian. Do not serialize structs with memcpy: padding and layout are not the contract.
 
-| Offset | Bytes | Campo | Valores |
+| Offset | Bytes | Field | Values |
 |---|---|---|---|
 | 0 | 4 | magic | ASCII `DSRM` |
-| 4 | 1 | version | `1`, independente do protocolo TCP atual |
+| 4 | 1 | version | `1`, independent of the current TCP protocol |
 | 5 | 1 | kind | `1` Input; `2` State |
 | 6 | 2 | flags | Zero |
-| 8 | 2 | length | 68 (`0x0044`), sem overhead criptografico |
+| 8 | 2 | length | 68 (`0x0044`), no cryptographic overhead |
 | 10 | 2 | reserved | Zero |
-| 12 | 16 | session | Bytes opacos nao todos nulos |
-| 28 | 16 | connection | Bytes opacos nao todos nulos |
-| 44 | 8 | sequence | Uint64: 1 ate 2^64-2 |
-| 52 | 4 | entity | Uint32 nao zero |
-| 56 | 4 | x | Int32 em complemento de dois, escala 1000 |
-| 60 | 4 | y | Mesmo formato |
-| 64 | 4 | z | Mesmo formato |
+| 12 | 16 | session | Opaque bytes not all null |
+| 28 | 16 | connection | Opaque bytes not all null |
+| 44 | 8 | sequence | Uint64: 1 to 2^64-2 |
+| 52 | 4 | entity | Uint32 not zero |
+| 56 | 4 | x | Int32 in two's complement, scale 1000 |
+| 60 | 4 | y | Same format |
+| 64 | 4 | z | Same format |
 
-Posicoes sao absolutas, nao deltas. Escala 1000 significa uma unidade do
-laboratorio dividida em mil partes; NAO pressupoe metros ou unidades do DSR.
-O codificador arredonda para o inteiro mais proximo, empates afastando de zero.
-Erro de quantizacao de ate 0,0005 unidade por eixo. Normaliza zero negativo.
-Valores originais e decodificados devem estar em [-100000, 100000], finitos.
-Nao ha floats IEEE na rede, nomes, senha, orientacao, timestamp ou acks neste v1.
-Novos campos/tipos exigem nova versao e negociacao; flags desconhecidas sao erro.
+Positions are absolutes, not deltas. Scale 1000 means one unit of
+laboratory divided into a thousand parts; It does NOT assume meters or DSR units.
+The encoder rounds to the nearest integer, ties away from zero.
+Quantization error of up to 0.0005 units per axis. Normalizes negative zero.
+Original and decoded values â€‹â€‹must be in [-100000, 100000], finite.
+There are no IEEE network floats, names, passwords, orientations, timestamps or acks in this v1.
+New fields/types require new version and negotiation; unknown flags are errors.
 
-## Sequencia e descarte
+## Sequence and disposal
 
-Input: contador independente por conexao/entidade, iniciado em 1. Incrementar
-por amostra emitida, mesmo quando a posicao permanece igual. O host atribui
-a sua propria revisao ao estado aceito, sem copiar o contador do cliente.
+Input: independent counter per connection/entity, starting at 1. Increment
+per emitted sample, even when the position remains the same. The host assigns
+your own revision to the accepted status, without copying the customer's meter.
 
-State: `sequence` e a revisao autoritativa da entidade, correspondente ao
-`PlayerState.revision` do host. Nao e um contador global de pacotes recebidos.
-O cliente acompanha a ultima revisao POR ENTIDADE; um jogador nao bloqueia outro.
-Reenviar o mesmo estado usa a mesma revisao; apenas uma nova atualizacao do
-mundo incrementa a revisao. Um snapshot pode repetir posicoes sem nova revisao.
+State: `sequence` is the authoritative revision of the entity, corresponding to the
+`PlayerState.revision` from the host. It is not a global counter of received packets.
+The client follows the latest revision PER ENTITY; one player does not block another.
+Resubmitting the same state uses the same revision; just a new update
+world increases the review. A snapshot can repeat positions without further review.
 
-Para cada stream autorizado `(kind, session, connection, entity)`:
+For each authorized stream `(kind, session, connection, entity)`:
 
-1. Autenticar o datagrama e verificar o vinculo ao canal autorizado.
-2. Decodificar tamanho, magic, versao, campos reservados, IDs e coordenadas.
-3. Confirmar direcao e entidade ativa/autorizada; rejeitar conexao ou sessao antiga.
-4. Exigir `sequence > ultima_aceita`. Duplicado/atrasado e descartado sem aplicar.
-5. Validar regras do mundo e limites de taxa; aplicar a atualizacao com sucesso.
-6. Somente entao atualizar o cursor da sequencia. Falhas nao avancam o cursor.
+1. Authenticate the datagram and verify the link to the authorized channel.
+2. Decode size, magic, version, reserved fields, IDs and coordinates.
+3. Confirm address and active/authorized entity; reject old connection or session.
+4. Require `sequence > ultima_aceita`. Duplicated/late and discarded without applying.
+5. Validate world rules and rate limits; apply the update successfully.
+6. Only then update the sequence cursor. Failures do not advance the cursor.
 
-Lacunas sao aceitas: apos 10, receber 13 aplica 13 sem esperar 11/12.
-Nao retransmitir posicoes antigas e nao usar comparacao com wrap. Zero e
-2^64-1 sao invalidos. Antes de esgotar contador/revisoes, interromper o stream
-e renegociar contexto; para revisoes do mundo, abrir nova sessao. Nunca zerar
-contador dentro da mesma identidade. Isto nao impede um cliente autorizado
-malicioso de enviar saltos enormes: nao e uma solucao de anticheat.
+Gaps are accepted: after 10, receiving 13 applies 13 without waiting for 11/12.
+Do not retransmit old positions and do not use wrap comparison. Zero and
+2^64-1 are invalid. Before running out of counter/revisions, stop the stream
+and renegotiate context; For world reviews, open a new session. Never reset
+accountant within the same identity. This does not prevent an authorized customer
+malicious to send huge jumps: it is not an anticheat solution.
 
-`movement::Stream` implementa vinculo, elegibilidade e cursor, nao autorizacao
-externa. `eligible()` nao altera estado; chamar `commit()` somente apos aplicacao
-validada. A integracao serializa estas operacoes no event loop.
-Um retorno falso de `eligible/commit` significa descartar. Excecoes do decoder
-devem descartar o datagrama, sem derrubar o host nem responder ao remetente.
+`movement::Stream` implements binding, eligibility and cursor, not authorization
+external. `eligible()` does not change state; call `commit()` only after application
+validated. The integration serializes these operations in the event loop.
+A false return of `eligible/commit` means discard. Decoder exceptions
+they must discard the datagram, without bringing down the host or responding to the sender.
 
-## Snapshot, entrada, saida e reconexao
+## Snapshot, entry, exit and reconnection
 
-- Enquanto recebe snapshot TCP, nao aplicar UDP. Ao concluir o snapshot,
-  criar streams State com baseline da revisao global R desse snapshot.
-  Todo movimento posterior ao snapshot tera revisao > R.
-- Novas entidades ficam habilitadas apenas apos SPAWN confiavel. Criar seu
-  cursor usando a revisao contida em SPAWN. Descartar UDP de entidade desconhecida.
-- Nao guardar fila ilimitada de pacotes que chegaram antes de SPAWN/snapshot.
-  Publicacao periodica de estado absoluto recupera a perda; precisa existir
-  mesmo se o jogador parar. Assim nao dependemos de um unico pacote final.
-- Em ressincronizacao, suspender UDP ate o novo snapshot atomico e reconstruir
-  os cursores. O mundo pode descartar atualizacoes intermediarias deliberadamente.
-- REMOVE confiavel elimina a entidade e o cursor. Datagramas atrasados nao
-  podem recriar o jogador. Uma reconexao recebe nova connection e nova entidade.
-- Ao cair o host, encerrar a sessao. Migracao de host nao faz parte deste marco.
+- While receiving TCP snapshot, do not apply UDP. When the snapshot is complete,
+create State streams baselined by the global R review of this snapshot.
+All movement after the snapshot will be reviewed > R.
+- New entities are only enabled after reliable SPAWN. Create your
+cursor using the revision contained in SPAWN. Discard UDP from unknown entity.
+- Do not store an unlimited queue of packets that arrived before SPAWN/snapshot.
+Absolute state periodical publication recovers loss; needs to exist
+even if the player stops. This way we do not depend on a single final package.
+- In resynchronization, suspend UDP until the new atomic snapshot and rebuild
+the cursors. The world may deliberately discard interim updates.
+- REMOVE reliably deletes the entity and cursor. No delayed datagrams
+can recreate the player. A reconnection receives a new connection and a new entity.
+- When the host falls, end the session. Host migration is not part of this milestone.
 
-## Limites propostos para a etapa de transporte
+## Proposed limits for the transport stage
 
-Os limites concretos implementados em 0.4 estao no [guia UDP](UDP_LAB.md).
-O texto abaixo registra os objetivos do contrato, nao resultados de capacidade.
+The concrete limits implemented in 0.4 are in the [UDP guide](UDP_LAB.md).
+The text below records the contract objectives, not capacity results.
 
-Iniciar o laboratorio com ate 30 propostas por segundo por cliente, agregando
-atualizacoes pendentes pela mais recente. Isso e parametro experimental, nao
-capacidade comprovada. O host precisa limitar entrada e saida agregadas, inclusive
-por destinatario, e reduzir a taxa sob congestionamento; UDP nao elimina isso.
-Estado absoluto precisa de republicacao periodica e fila limitada, nao backlog
-de todos os movimentos. Estabelecer os limites concretos e medir o overhead
-quando a biblioteca protegida for integrada. Nao ha fragmentacao de payload,
-batching ou envio de snapshots grandes em UDP neste contrato.
+Start the laboratory with up to 30 proposals per second per customer, adding
+pending updates for the most recent. This is an experimental parameter, not
+proven capacity. The host needs to limit aggregate input and output, including
+per recipient, and reduce the congestion charge; UDP does not eliminate this.
+Absolute state needs periodic republication and limited queue, not backlog
+of all movements. Establish concrete limits and measure overhead
+when the protected library is integrated. There is no payload fragmentation,
+batching or sending large snapshots in UDP in this contract.
 
-RTT, perdas e idade dos estados serao instrumentados na fase de metricas;
-nao comparar relogios absolutos de PCs diferentes nem inferir RTT so de sequence.
-Interpolacao, predicao e reconciliacao ficam para uma etapa posterior.
+RTT, losses and age of states will be instrumented in the metrics phase;
+do not compare absolute clocks from different PCs or infer RTT from sequence alone.
+Interpolation, prediction and reconciliation are for a later stage.
 
-## Verificacao disponivel agora
+## Verification available now
 
-Arquivos: `protocol/movement_packet.*` (codec) e `protocol/movement_stream.*`
-(sequencia/contexto). `tests/movement_unit.cpp` testa vetor binario de referencia,
-roundtrip, quantizacao, limites, cabecalhos invalidos, truncamento, IDs, isolamento,
-duplicacao, reordenacao, lacunas, snapshot, reconexao e proibicao de wrap.
+Files: `protocol/movement_packet.*` (codec) and `protocol/movement_stream.*`
+(sequence/context). `tests/movement_unit.cpp` tests reference binary vector,
+roundtrip, quantization, limits, invalid headers, truncation, IDs, isolation,
+duplication, reordering, gaps, snapshot, reconnection and wrap prohibition.
 
-Na raiz do projeto, apos recompilar:
+At the root of the project, after recompiling:
 
 ```powershell
 cmake --build build-v04 --parallel 2
 ctest --test-dir build-v04 -R movement_unit --output-on-failure
 ```
 
-Passar esses testes comprova regras locais; os testes de DTLS/UDP sao separados
-no guia da integracao. Nao comprova auditoria criptografica, comportamento
-LAN/Internet ou multiplayer do Dark Souls.
+Passing these tests proves local rules; DTLS/UDP tests are separate
+in the integration guide. Does not prove cryptographic audit, behavior
+LAN/Internet or Dark Souls multiplayer.

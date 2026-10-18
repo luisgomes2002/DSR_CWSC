@@ -14,6 +14,7 @@ void Host::negotiate_movement(Peer &p, const std::vector<std::string> &fields)
     {
         const auto port = number(fields[2], 1024, 65535);
         auto link = std::make_unique<MovementLink>(p.socket, p.id);
+        if (metrics_enabled) link->metrics.enable(true, p.id);
         const auto connection = new_identity();
         link->establish(*p.tls, true, parse_identity(room), connection, port, udp_library);
         emit(p, "UDP_OFFER\t1\t" + room + "\t" + identity_hex(connection) + "\t" + std::to_string(link->port()));
@@ -61,8 +62,8 @@ void Host::service_movement(Peer &p)
             auto it = world.players().upper_bound(link.next_entity);
             if (it == world.players().end()) it = world.players().begin();
             const auto &player = it->second;
-            link.send(movement::Kind::State, player.id, player.revision, player.position);
-            link.next_entity = player.id;
+            if (link.send(movement::Kind::State, player.id, player.revision, player.position))
+                link.next_entity = player.id;
         }
     }
     catch (const std::exception &) { reject(p, "UDP_CHANNEL"); }

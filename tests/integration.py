@@ -38,7 +38,7 @@ class Peer:
         while b"\n" not in self.buffer:
             data = self.sock.recv(4096)
             if not data:
-                raise EOFError("Host encerrou a conexao")
+                raise EOFError("Host closed the connection")
             self.buffer += data
         line, self.buffer = self.buffer.split(b"\n", 1)
         return line.decode("ascii")
@@ -48,7 +48,7 @@ class Peer:
             line = self.line()
             if line == prefix or line.startswith(prefix + "\t"):
                 return line
-        raise AssertionError("Evento esperado nao recebido: " + prefix)
+        raise AssertionError("Expected event was not received: " + prefix)
 
     def login(self, key, name="player"):
         self.send("HELLO\t" + PROTOCOL + "\t" + name + "\t" + key + "\t" + BUILD_ID)
@@ -94,9 +94,9 @@ class NetworkTests(unittest.TestCase):
             self.port = int(ready[2])
             self.assertEqual(len(ready[3]), 32)
         except Exception:
-            details = self.server.stderr.read() if self.server.poll() is not None else "host ainda ativo"
+            details = self.server.stderr.read() if self.server.poll() is not None else "host is still running"
             self.tearDown()
-            raise RuntimeError("Host nao iniciou: " + details)
+            raise RuntimeError("Host did not start: " + details)
 
     def tearDown(self):
         for peer in self.clients:
@@ -261,7 +261,7 @@ class NetworkTests(unittest.TestCase):
                 if output.get(timeout=4).startswith("WELCOME\t"):
                     break
             else:
-                self.fail("Cliente nao admitido")
+                self.fail("Client was not admitted")
             self.server.terminate()
             self.server.wait(timeout=3)
             proc.wait(timeout=4)

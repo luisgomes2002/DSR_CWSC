@@ -1,25 +1,25 @@
-# Canal protegido e compatibilidade — marco 0.3
+# Protected channel and compatibility – milestone 0.3
 
-Este guia registra o marco 0.3. Para a versao atual 0.4, use o
-[guia UDP/TLS](UDP_LAB.md), com executaveis `build-v04`. A build atual exige
-`dsr-network-lab-0.4` no HELLO; os exemplos abaixo ficam como historico.
+This guide records milestone 0.3. For the current version 0.4, use the
+[UDP/TLS guide](UDP_LAB.md), with `build-v04` executables. The current build requires
+`dsr-network-lab-0.4` in HELLO; The examples below are historical.
 
-O laboratório agora oferece TLS 1.2 com OpenSSL 3 e validação explícita do
-certificado do host por impressão digital SHA-256. O pin deve ser obtido
-independentemente, por um canal confiável, antes de conectar. Não existe
-aceitação automática do primeiro certificado recebido.
+The lab now offers TLS 1.2 with OpenSSL 3 and explicit validation of the
+host certified by SHA-256 fingerprint. The pin must be obtained
+independently, over a trusted channel, before connecting. Does not exist
+automatic acceptance of the first certificate received.
 
-O executável novo é `build-v03\dsr_net.exe`. Host e clientes precisam ser
-da versão nova: o protocolo passou para **3**, com build de laboratório
-`dsr-network-lab-0.3`. Esse identificador indica compatibilidade de mensagens;
-não é atestado de integridade, DRM, licença nem hash de um executável do DSR.
+The new executable is `build-v03\dsr_net.exe`. Host and clients need to be
+of the new version: the protocol went to **3**, with laboratory build
+`dsr-network-lab-0.3`. This identifier indicates message compatibility;
+It is not a certificate of integrity, DRM, license or hash of a DSR executable.
 
-As entidades ainda são fictícias. Não houve execução, modificação ou integração
-ao Dark Souls, teste de contas ou avaliação de compatibilidade Steam/não original.
+The entities are still fictitious. There was no execution, modification or integration
+to Dark Souls, account testing or Steam/non-genuine compatibility assessment.
 
-## Dependências e motivo da escolha
+## Dependencies and reasons for choice
 
-Nesta máquina, o Git para Windows já fornece:
+On this machine, Git for Windows already provides:
 
 ```text
 C:\Program Files\Git\usr\bin\openssl.exe
@@ -27,170 +27,170 @@ C:\Program Files\Git\mingw64\bin\libssl-3-x64.dll
 C:\Program Files\Git\mingw64\bin\libcrypto-3-x64.dll
 ```
 
-O CLI é usado para gerar o certificado. A aplicação usa a ABI pública do
-OpenSSL 3 x64, carregando as DLLs de uma pasta absoluta confiável, sem buscar
-em diretório de trabalho ou PATH. Não foram baixados, copiados ou instalados
-componentes. Em outro PC, essas bibliotecas precisam estar disponíveis;
-opcionalmente informe `--tls-library 'C:\pasta\confiavel'` em host ou cliente.
-O CLI aceita caminho próprio por `--openssl` no gerador de identidade.
-Distribuir uma aplicação com bibliotecas de terceiros exige tratar seus
-requisitos de distribuição; esta entrega não empacota as DLLs do Git.
+The CLI is used to generate the certificate. The application uses the public ABI of the
+OpenSSL 3 x64, loading the DLLs from an absolute trusted folder, without fetching
+in working directory or PATH. Have not been downloaded, copied or installed
+components. On another PC, these libraries need to be available;
+optionally enter `--tls-library 'C:\folder\trusted'` on host or client.
+The CLI accepts proper path via `--openssl` in the identity generator.
+Distributing an application with third-party libraries requires handling their
+distribution requirements; This release does not package the Git DLLs.
 
-A tentativa inicial com Schannel retornou `SEC_E_NO_CREDENTIALS` neste
-ambiente. Não foi diagnosticada a causa completa nem adotado um contorno
-que instalasse certificados ou persistisse chaves no perfil Windows.
-A implementação final usa OpenSSL nos dois lados e foi testada contra
-clientes/servidor independentes da biblioteca `ssl` do Python.
+The initial attempt with Schannel returned `SEC_E_NO_CREDENTIALS` in this
+environment. The complete cause was not diagnosed nor a workaround adopted.
+that installed certificates or persisted keys in the Windows profile.
+The final implementation uses OpenSSL on both sides and has been tested against
+clients/server independent of the Python `ssl` library.
 
-## 1. Gerar a identidade privada do host
+## 1. Generate the host's private identity
 
-No terminal do host:
+On the host terminal:
 
 ```powershell
-cd 'C:\Users\luisg\OneDrive\Documentos\dsr-network'
+cd 'C:\Users\luisg\OneDrive\Documents\dsr-network'
 $dsrIdentity = Join-Path $env:LOCALAPPDATA 'DSRNetworkLab\host-v03'
-$env:DSR_TLS_PFX_PASSWORD = 'senha-exclusiva-do-arquivo-pfx'
+$env:DSR_TLS_PFX_PASSWORD = 'pfx-file-unique-password'
 python .\tools\create_tls_identity.py --output $dsrIdentity
 ```
 
-Escolha uma senha própria de 12 a 128 caracteres ASCII, diferente de senhas
-de contas e da sala. O exemplo acima é descartável. A variável permanece
-somente naquele terminal e seus processos filhos, sem persistência no sistema.
-Proteja também o acesso ao terminal e ao diretório privado.
+Choose your own password of 12 to 128 ASCII characters, different from passwords
+of accounts and the room. The example above is disposable. The variable remains
+only in that terminal and its child processes, without persistence in the system.
+Also protect access to the terminal and private directory.
 
-O gerador exige uma pasta **nova**, sem sobrescrever arquivos. Se ela já
-existir, reuse a identidade existente ou escolha outro nome de pasta. O script
-cria somente arquivos nessa pasta; não instala certificados no Windows.
-Na investigação automatizada, foram usadas apenas identidades temporárias
-de teste, removidas ao finalizar a suíte. Nenhuma identidade permanente do
-usuário foi gerada automaticamente.
+The generator requires a **new** folder, without overwriting files. If she already
+exists, reuse the existing identity, or choose another folder name. The script
+creates only files in that folder; does not install certificates on Windows.
+In the automated investigation, only temporary identities were used
+test, removed when finalizing the suite. No permanent identity of the
+username was automatically generated.
 
-Arquivos gerados:
+Generated files:
 
-- `host.pfx`: certificado com chave privada, protegido pela senha PFX.
-- `host.key.pem`: chave privada também cifrada, necessária apenas para geração/testes.
-- `host.crt.pem`: certificado público.
+- `host.pfx`: certificate with private key, protected by the PFX password.
+- `host.key.pem`: private key also encrypted, necessary only for generation/testing.
+- `host.crt.pem`: public certificate.
 
-O certificado é autoassinado, RSA 3072 e válido por 30 dias. O gerador imprime
-`TLS_PIN`, um hash SHA-256 do certificado DER. **Nunca compartilhe PFX, chave
-privada ou senha PFX com convidados.** Compartilhe apenas o pin e, separadamente,
-a senha da sala. Evite guardar identidade privada em pastas sincronizadas;
-o projeto atual fica no OneDrive. `.gitignore` não impede sincronização em nuvem.
+The certificate is self-signed, RSA 3072 and valid for 30 days. The generator prints
+`TLS_PIN`, a SHA-256 hash of the DER certificate. **Never share PFX, key
+private or PFX password with guests.** Share only the pin and separately
+the room password. Avoid saving private identities in synchronized folders;
+the current project lives on OneDrive. `.gitignore` does not prevent cloud synchronization.
 
-## 2. Iniciar o host protegido
+## 2. Start Protected Host
 
-No mesmo terminal, mantendo `DSR_TLS_PFX_PASSWORD` e `$dsrIdentity`:
+In the same terminal, keeping `DSR_TLS_PFX_PASSWORD` and `$dsrIdentity`:
 
 ```powershell
 $env:DSR_ROOM_PASSWORD = 'lab-local-123'
 .\build-v03\dsr_net.exe host --port 27032 --max-players 4 --tls-pfx "$dsrIdentity\host.pfx"
 ```
 
-A porta 27032 evita conflito com laboratórios anteriores. O host mostra
-`SERVER_READY` e `TLS_PIN`. Confira se o pin corresponde ao emitido pelo
-gerador. Se o arquivo/senha PFX, certificado ou bibliotecas forem inválidos,
-o host falha antes de abrir a porta.
+Port 27032 avoids conflict with previous labs. The host shows
+`SERVER_READY` and `TLS_PIN`. Check if the pin matches the one issued by the
+generator. If the PFX file/password, certificate or libraries are invalid,
+the host fails before opening the port.
 
-## 3. Conectar os clientes protegidos
+## 3. Connect protected clients
 
-Em outro PowerShell:
+In another PowerShell:
 
 ```powershell
-cd 'C:\Users\luisg\OneDrive\Documentos\dsr-network'
+cd 'C:\Users\luisg\OneDrive\Documents\dsr-network'
 $env:DSR_ROOM_PASSWORD = 'lab-local-123'
 $dsrPin = 'COLE_AQUI_OS_64_DIGITOS_HEXADECIMAIS_DO_TLS_PIN'
 .\build-v03\dsr_net.exe join --port 27032 --name Piero --tls-pin $dsrPin
 ```
 
-Troque o texto do pin pelo valor real, sem dois-pontos ou espaços. Maiúsculas
-e minúsculas são aceitas. Não execute com o placeholder. Abra outro cliente
-da mesma forma, com outro nome.
+Replace the pin text with the current value, without colons or spaces. Capital letters
+and lowercase letters are accepted. Do not run with the placeholder. Open another client
+in the same way, with another name.
 
-Os comandos anteriores continuam disponíveis:
+The previous commands are still available:
 
 ```text
 /move 10 0 5
 /players
 /who
-/send 2 mensagem privada
+/send 2 private message
 /quit
 ```
 
-A senha da sala só entra em um registro TLS após verificar certificado,
-validade e correspondência exata do pin. Não há fallback para texto claro
-quando TLS, bibliotecas, certificado ou pin falham.
+The room password only enters a TLS record after verifying the certificate,
+validity and exact match of the pin. There is no fallback for clear text
+when TLS, libraries, certificate or pin fail.
 
-O cliente não usa a cadeia de CAs, nome DNS/SAN ou revogação online como
-modelo de confiança: **usa o certificado exato previamente autorizado pelo
-pin**, mais a validade temporal. Isso permite o laboratório por IP, inclusive
-quando diferente do SAN local do certificado. Ao renovar a identidade, o
-pin muda e deve ser compartilhado novamente por canal confiável.
+The client does not use the CA chain, DNS/SAN name, or online revocation as
+trust model: **uses the exact certificate previously authorized by the
+pin**, plus temporal validity. This allows the laboratory by IP, including
+when different from the local SAN of the certificate. By renewing the identity, the
+pin changes and must be shared again via a trusted channel.
 
-## 4. Testes de rejeição
+## 4. Rejection tests
 
-- Mude a senha da sala somente no terminal de um cliente: deve receber `ERROR AUTH` dentro de TLS.
-- Use 64 zeros no pin: deve falhar com impressão digital incorreta, sem enviar a senha.
-- Tente conectar cliente antigo: não deve ser admitido. O protocolo/build é verificado antes da criação de entidade.
-- Tente cliente sem `--tls-pin` contra porta TLS: não deve entrar; não existe negociação automática para texto claro.
-- Mude a senha PFX do host: ele não deve emitir `SERVER_READY`.
+- Change the room password only on a client terminal: it must receive `ERROR AUTH` within TLS.
+- Use 64 zeros in the pin: should fail with incorrect fingerprint, without sending the password.
+- Try connecting old client: it should not be admitted. The protocol/build is checked before entity creation.
+- Try client without `--tls-pin` against TLS port: it should not enter; There is no automatic negotiation for plain text.
+- Change the host's PFX password: it should not issue `SERVER_READY`.
 
-Senha incorreta da sala é diferente de senha incorreta do arquivo PFX. O
-cliente nunca precisa do arquivo nem da senha PFX.
+Incorrect room password is different from incorrect PFX file password. THE
+The client never needs the PFX file or password.
 
-## LAN e limites de segurança
+## LAN and security limits
 
-O padrão continua sendo `127.0.0.1`. O modo sem TLS permanece disponível
-**somente em loopback**, com aviso explícito. O antigo `--allow-insecure-lan`
-foi removido. Fora de loopback, a aplicação exige `--lan` **e** TLS:
+The default remains `127.0.0.1`. Non-TLS mode remains available
+**loopback only**, with explicit warning. The old `--allow-insecure-lan`
+has been removed. Outside of loopback, the application requires `--lan` **and** TLS:
 
 ```text
-host: --address IP_LOCAL_DO_HOST --lan --tls-pfx ARQUIVO
+host: --address IP_LOCAL_DO_HOST --lan --tls-pfx FILE
 join: --address IP_LOCAL_DO_HOST --lan --tls-pin HASH
 ```
 
-Esses exemplos são opções, não comandos completos. Use também a mesma porta
-e senha nos dois lados. Nenhuma regra de firewall é criada automaticamente.
-**LAN e Internet não foram testadas nesta entrega**, apenas processos em
-loopback. Não encaminhe portas para a Internet nesta fase.
+These examples are options, not complete commands. Also use the same port
+and password on both sides. No firewall rules are created automatically.
+**LAN and Internet were not tested in this delivery**, only processes in
+loopback. Do not forward ports to the Internet at this stage.
 
-TLS protege o canal, mas não resolve senha fraca, host malicioso, máquina
-comprometida, proteção das chaves em disco, autorização por usuário, abuso
-de recursos, NAT/CGNAT ou sincronização do jogo. O PFX cifrado não substitui
-permissões de arquivos adequadas. Não há auditoria de segurança nem garantia
-de risco zero. Há limites de filas, conexões e tempo; isso não comprova
-resistência a negação de serviço. O encerramento atualmente fecha TCP depois
-das mensagens da aplicação; não implementa troca completa de `close_notify`.
+TLS protects the channel, but does not resolve weak password, malicious host, machine
+compromised, protection of keys on disk, authorization per user, abuse
+of resources, NAT/CGNAT or game synchronization. The encrypted PFX does not replace
+appropriate file permissions. There is no security audit or guarantee
+zero risk. There are limits on queues, connections and time; this does not prove
+resistance to denial of service. Shutdown currently closes TCP after
+application messages; does not implement full exchange of `close_notify`.
 
-Mantenha o runtime OpenSSL atualizado por sua origem confiável. Não baixe DLLs
-avulsas de sites desconhecidos. A ABI aceita OpenSSL 3, mas isso não avalia
-automaticamente se uma versão específica está atualizada ou livre de falhas.
+Keep the OpenSSL runtime updated from its trusted source. Do not download DLLs
+from unknown websites. The ABI accepts OpenSSL 3, but this does not evaluate
+automatically check whether a specific version is up to date or bug-free.
 
-## Protocolo 3
+## Protocol 3
 
-O conteúdo da aplicação continua sendo linhas ASCII, com LF e campos TAB;
-não virou um protocolo binário de gameplay. TLS encapsula essas linhas.
+The application content continues to be ASCII lines, with LF and TAB fields;
+it did not become a binary gameplay protocol. TLS encapsulates these lines.
 
 ```text
-HELLO<TAB>3<TAB>nome<TAB>senha<TAB>dsr-network-lab-0.3
-WELCOME<TAB>3<TAB>sala<TAB>id<TAB>capacidade
+HELLO<TAB>3<TAB>name<TAB>password<TAB>dsr-network-lab-0.3
+WELCOME<TAB>3<TAB>room<TAB>id<TAB>capacity
 ```
 
-`ERROR VERSION` indica versão incompatível; `ERROR BUILD`, build de laboratório
-incompatível. São verificações de compatibilidade declarada, não autenticação
-de binário. Mensagens de entidades, chat e sala mantêm seus campos anteriores.
+`ERROR VERSION` indicates incompatible version; `ERROR BUILD`, laboratory build
+incompatible. These are declared compatibility checks, not authentication
+of binary. Entity, chat and room messages maintain their previous fields.
 
-O host usa um loop não bloqueante para texto simples ou TLS, escolhido
-explicitamente na inicialização, sem detectar/downgradear pelo tráfego.
-As chaves e o certificado são carregados em memória pelo runtime OpenSSL,
-sem usar um repositório persistente de certificados/chaves do Windows.
+The host uses a non-blocking loop for plaintext or TLS, chosen
+explicitly at startup, without detection/downgrading by traffic.
+The keys and certificate are loaded into memory by the OpenSSL runtime,
+without using a persistent Windows certificate/key store.
 
-## Organização e testes
+## Organization and testing
 
-- `net/tls.hpp/.cpp`: fachada do canal, credenciais e validação do formato do pin.
-- `net/openssl_transport.hpp/.cpp`: adaptador TLS, carregamento explícito do runtime,
-  leitura do PFX em memória, BIOs e registros cifrados não bloqueantes.
-- `tools/create_tls_identity.py`, `tools/localhost.cnf`: geração explícita de identidade.
-- `tests/tls_integration.py`: interoperabilidade e testes de rejeição em loopback.
+- `net/tls.hpp/.cpp`: channel facade, credentials and pin format validation.
+- `net/openssl_transport.hpp/.cpp`: TLS adapter, explicit runtime loading,
+reading PFX into memory, BIOs and non-blocking encrypted records.
+- `tools/create_tls_identity.py`, `tools/localhost.cnf`: explicit identity generation.
+- `tests/tls_integration.py`: interoperability and loopback rejection tests.
 
 ```powershell
 cmake -S . -B build-v03 -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=ON
@@ -198,17 +198,17 @@ cmake --build build-v03 --parallel 2
 ctest --test-dir build-v03 --verbose
 ```
 
-Há 8 casos unitários, 14 cenários de rede, 11 de entidades e 12 de TLS.
-Os cenários TLS incluem quatro clientes, cliente nativo, senha e build errados,
-tráfego não TLS, pin incorreto sem dados de aplicação enviados, senha PFX errada,
-hash DER conferido, registro cifrado adulterado, captura por proxy sem senha/
-movimento em texto claro e timeout de handshake. A captura é local, feita
-sobre conexões criadas exclusivamente pelo teste.
+There are 8 unitary cases, 14 network scenarios, 11 entity scenarios and 12 TLS scenarios.
+TLS scenarios include four clients, native client, wrong password and build,
+non-TLS traffic, incorrect pin with no application data sent, wrong PFX password,
+DER hash checked, encrypted record tampered with, proxy capture without password/
+movement in clear text and handshake timeout. The capture is local, made
+about created connections exclusively by the test.
 
-O CMake registra os testes TLS somente se encontrar o CLI OpenSSL; se não
-encontrar, emite um aviso. Informe `-DDSR_OPENSSL_EXECUTABLE=CAMINHO` para
-habilitá-los. Nesse caso, passar nas outras três suítes não valida TLS.
+CMake logs TLS tests only if it finds the OpenSSL CLI; if not
+found, issues a warning. Enter `-DDSR_OPENSSL_EXECUTABLE=PATH` to
+enable them. In this case, passing the other three suites does not validate TLS.
 
-Referências: [OpenSSL handshake](https://docs.openssl.org/3.0/man3/SSL_do_handshake/),
-[versões TLS](https://docs.openssl.org/3.0/man3/SSL_CTX_set_min_proto_version/),
+References: [OpenSSL handshake](https://docs.openssl.org/3.0/man3/SSL_do_handshake/),
+[TLS versions](https://docs.openssl.org/3.0/man3/SSL_CTX_set_min_proto_version/),
 [PKCS12_parse](https://docs.openssl.org/3.0/man3/PKCS12_parse/).

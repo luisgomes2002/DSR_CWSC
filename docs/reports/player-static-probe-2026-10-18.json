@@ -1,0 +1,416 @@
+{
+  "sha256": "a45aaa36dd2f6cc151670a639ea5547043cf38ea79ff4178b963c6ed71f98d7b",
+  "preferred_image_base": "0x140000000",
+  "string_matches": 13,
+  "strings": [
+    {
+      "rva": "0x131d91c",
+      "encoding": "ascii",
+      "text": "ChrIns"
+    },
+    {
+      "rva": "0x1324a38",
+      "encoding": "ascii",
+      "text": "PlayerIns"
+    },
+    {
+      "rva": "0x132a6d0",
+      "encoding": "ascii",
+      "text": "ChrCtrl"
+    },
+    {
+      "rva": "0x132c070",
+      "encoding": "ascii",
+      "text": "PlayerCtrl"
+    },
+    {
+      "rva": "0x1355468",
+      "encoding": "ascii",
+      "text": "GetLocalPlayerId"
+    },
+    {
+      "rva": "0x138bc80",
+      "encoding": "ascii",
+      "text": "IsLocalPlayer"
+    },
+    {
+      "rva": "0x12d4f78",
+      "encoding": "utf-16le",
+      "text": "WorldChrMan"
+    },
+    {
+      "rva": "0x131d928",
+      "encoding": "utf-16le",
+      "text": "ChrIns"
+    },
+    {
+      "rva": "0x1324a48",
+      "encoding": "utf-16le",
+      "text": "PlayerIns"
+    },
+    {
+      "rva": "0x132b4b0",
+      "encoding": "utf-16le",
+      "text": "Position : %.2f %.2f %.2f (%.2f)"
+    },
+    {
+      "rva": "0x132c080",
+      "encoding": "utf-16le",
+      "text": "PlayerCtrl"
+    },
+    {
+      "rva": "0x1355420",
+      "encoding": "utf-16le",
+      "text": "GetLocalPlayerId"
+    },
+    {
+      "rva": "0x138bc60",
+      "encoding": "utf-16le",
+      "text": "IsLocalPlayer"
+    }
+  ],
+  "rtti": [
+    {
+      "type_name": ".?AVPlayerIns@NS_FRPG@@",
+      "descriptor": "0x1b00708",
+      "locators": [
+        {
+          "rva": "0x164ad48",
+          "subobject_offset": 0,
+          "vtables": [
+            {
+              "rva": "0x13251f0",
+              "first_slots": [
+                "0x3549c0",
+                "0x3654d0",
+                "0x339f30",
+                "0x359cf0",
+                "0x359c70",
+                "0x359d00",
+                "0x338990",
+                "0x355760",
+                "0x355890",
+                "0x355c10",
+                "0x356680",
+                "0x31f1f0"
+              ]
+            }
+          ],
+          "bases": [
+            {
+              "name": ".?AVPlayerIns@NS_FRPG@@",
+              "member_displacement": 0
+            },
+            {
+              "name": ".?AVChrIns@NS_FRPG@@",
+              "member_displacement": 0
+            },
+            {
+              "name": ".?AVFieldInsBase@NS_FRPG@@",
+              "member_displacement": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type_name": ".?AVChrIns@NS_FRPG@@",
+      "descriptor": "0x1affd18",
+      "locators": [
+        {
+          "rva": "0x16499c0",
+          "subobject_offset": 0,
+          "vtables": [
+            {
+              "rva": "0x131e008",
+              "first_slots": [
+                "0x31e0a0",
+                "0x3394f0",
+                "0x339f30",
+                "0x301290",
+                "0x301280",
+                "0x3012a0",
+                "0x338990",
+                "0x33a2f0",
+                "0x31ef90",
+                "0x31f110",
+                "0x31f170",
+                "0x31f1f0"
+              ]
+            }
+          ],
+          "bases": [
+            {
+              "name": ".?AVChrIns@NS_FRPG@@",
+              "member_displacement": 0
+            },
+            {
+              "name": ".?AVFieldInsBase@NS_FRPG@@",
+              "member_displacement": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type_name": ".?AVWorldChrManImp@NS_FRPG@@",
+      "descriptor": "0x1b00c08",
+      "locators": [
+        {
+          "rva": "0x164b700",
+          "subobject_offset": 0,
+          "vtables": [
+            {
+              "rva": "0x1328210",
+              "first_slots": [
+                "0x373eb0"
+              ]
+            }
+          ],
+          "bases": [
+            {
+              "name": ".?AVWorldChrManImp@NS_FRPG@@",
+              "member_displacement": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type_name": ".?AVPlayerCtrl@NS_FRPG@@",
+      "descriptor": "0x1b00ea0",
+      "locators": [
+        {
+          "rva": "0x164bbf8",
+          "subobject_offset": 0,
+          "vtables": [
+            {
+              "rva": "0x132c258",
+              "first_slots": [
+                "0x3815b0",
+                "0x383af0",
+                "0x381780",
+                "0x381a50",
+                "0x3789b0",
+                "0x381be0",
+                "0x378b10",
+                "0x37a040",
+                "0x37a120",
+                "0x37a170",
+                "0x37a1f0",
+                "0x37a280"
+              ]
+            }
+          ],
+          "bases": [
+            {
+              "name": ".?AVPlayerCtrl@NS_FRPG@@",
+              "member_displacement": 0
+            },
+            {
+              "name": ".?AVChrCtrl@NS_FRPG@@",
+              "member_displacement": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type_name": ".?AVChrCtrl@NS_FRPG@@",
+      "descriptor": "0x1b00d10",
+      "locators": [
+        {
+          "rva": "0x164b8f8",
+          "subobject_offset": 0,
+          "vtables": [
+            {
+              "rva": "0x132aab0",
+              "first_slots": [
+                "0x3782a0",
+                "0x37f440",
+                "0x3786e0",
+                "0x378850",
+                "0x3789b0",
+                "0x378a20",
+                "0x378b10",
+                "0x37a040",
+                "0x37a120",
+                "0x37a170",
+                "0x37a1f0",
+                "0x37a280"
+              ]
+            }
+          ],
+          "bases": [
+            {
+              "name": ".?AVChrCtrl@NS_FRPG@@",
+              "member_displacement": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type_name": ".?AVPlayerGameData@NS_FRPG@@",
+      "descriptor": "0x1b2b3e0",
+      "locators": [
+        {
+          "rva": "0x1685800",
+          "subobject_offset": 0,
+          "vtables": [
+            {
+              "rva": "0x13dd620",
+              "first_slots": [
+                "0x766160",
+                "0x7619a0",
+                "0x761bb0",
+                "0x7634e0",
+                "0x765550"
+              ]
+            }
+          ],
+          "bases": [
+            {
+              "name": ".?AVPlayerGameData@NS_FRPG@@",
+              "member_displacement": 0
+            },
+            {
+              "name": ".?AVIGameDataElem@NS_FRPG@@",
+              "member_displacement": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type_name": ".?AVGameDataMan@NS_FRPG@@",
+      "descriptor": "0x1b2b108",
+      "locators": [
+        {
+          "rva": "0x1685278",
+          "subobject_offset": 0,
+          "vtables": [
+            {
+              "rva": "0x13dbf70",
+              "first_slots": [
+                "0x7599f0"
+              ]
+            }
+          ],
+          "bases": [
+            {
+              "name": ".?AVGameDataMan@NS_FRPG@@",
+              "member_displacement": 0
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "rip_candidate_ref_count": 1087,
+  "rip_candidate_refs": [
+    {
+      "site": "0xb8604",
+      "unwind_region": null
+    },
+    {
+      "site": "0xbb342",
+      "unwind_region": null
+    },
+    {
+      "site": "0xbe2cf",
+      "unwind_region": [
+        "0xbe220",
+        "0xbe374"
+      ]
+    },
+    {
+      "site": "0xc674a",
+      "unwind_region": [
+        "0xc6700",
+        "0xc6864"
+      ]
+    },
+    {
+      "site": "0xd53bb",
+      "unwind_region": null
+    },
+    {
+      "site": "0xd84a7",
+      "unwind_region": [
+        "0xd8440",
+        "0xd858e"
+      ]
+    },
+    {
+      "site": "0xeddfe",
+      "unwind_region": [
+        "0xedd60",
+        "0xede53"
+      ]
+    },
+    {
+      "site": "0xee178",
+      "unwind_region": [
+        "0xee130",
+        "0xee1d5"
+      ]
+    },
+    {
+      "site": "0xf115b",
+      "unwind_region": [
+        "0xf1120",
+        "0xf1296"
+      ]
+    },
+    {
+      "site": "0xf11a1",
+      "unwind_region": [
+        "0xf1120",
+        "0xf1296"
+      ]
+    },
+    {
+      "site": "0xf6238",
+      "unwind_region": [
+        "0xf6220",
+        "0xf62ce"
+      ]
+    },
+    {
+      "site": "0xf62f8",
+      "unwind_region": [
+        "0xf62e0",
+        "0xf638e"
+      ]
+    },
+    {
+      "site": "0xf63bb",
+      "unwind_region": [
+        "0xf63a0",
+        "0xf6446"
+      ]
+    },
+    {
+      "site": "0xf646b",
+      "unwind_region": [
+        "0xf6450",
+        "0xf650c"
+      ]
+    },
+    {
+      "site": "0xf653e",
+      "unwind_region": [
+        "0xf6520",
+        "0xf65ac"
+      ]
+    },
+    {
+      "site": "0xf65d8",
+      "unwind_region": [
+        "0xf65c0",
+        "0xf6655"
+      ]
+    }
+  ]
+}

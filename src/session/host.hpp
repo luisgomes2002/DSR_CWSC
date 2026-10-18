@@ -25,6 +25,7 @@ private:
     unsigned capacity, next_id = 1;
     World world;
     bool udp_enabled = false;
+    bool metrics_enabled = false;
     std::string udp_library;
 
     void emit(Peer &p, const std::string &line);
